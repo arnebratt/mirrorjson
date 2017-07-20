@@ -1,0 +1,12 @@
+{
+  "name": "mirrorjson",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Arne Bakkebø",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.3",
+    "md5": "^2.2.1",
+    "mongoose": "^4.11.3"
+  }
+}
