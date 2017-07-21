@@ -14,7 +14,9 @@ promise.then(function (db) {
         require("./models/json");
         require("./models/domain_match");
         let dataCtrl = require("./controllers/data");
+        let domainCtrl = require("./controllers/domains");
 
+    	app.get(["/mirrorjson"], domainCtrl.updateDomainRegister);
     	app.get(["/*"], dataCtrl.getData);
     } catch(err) {
         console.log(err);

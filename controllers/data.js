@@ -4,6 +4,7 @@ let mongoose = require('mongoose'),
 
 let Data = mongoose.model('Data');
 
+// Save json from given path to database
 let storeData = function(path, json) {
 	let hash = md5(path);
 
@@ -20,6 +21,7 @@ let storeData = function(path, json) {
     });
 }
 
+// Generate external url based on current domain
 let getExternalUrl = function(req, res, callback) {
     let Domain = mongoose.model('Domain');
 
@@ -34,6 +36,7 @@ let getExternalUrl = function(req, res, callback) {
     });
 }
 
+// Fetch json data from external API
 let getExternalData = function(url, callback) {
     let options = {
         uri : url,
@@ -42,6 +45,7 @@ let getExternalData = function(url, callback) {
     request(options, callback);
 }
 
+// Get json data from database based on given path
 let findByHash = function(path, res) {
 	let hash = md5(path);
 
@@ -55,6 +59,7 @@ let findByHash = function(path, res) {
     });
 }
 
+// Get json from external API, or the mirrored data in local MongoDB database
 exports.getData = function(req, res) {
     getExternalUrl(req, res, function(url) {
         getExternalData(url, function(err, results, body) {
