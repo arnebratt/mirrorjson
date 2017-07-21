@@ -12,6 +12,7 @@ promise.then(function (db) {
 
     try {
         require("./models/json");
+        require("./models/domain_match");
         let dataCtrl = require("./controllers/data");
 
     	app.get(["/*"], dataCtrl.getData);
