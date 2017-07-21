@@ -9,12 +9,15 @@ promise.then(function (db) {
 	db.on('error', function () {
 	  throw new Error('Unable to connect to database at ' + mongoUri);
 	});
-    require("./models/json");
 
-    let dataCtrl = require("./controllers/data");
-    console.log(dataCtrl);
+    try {
+        require("./models/json");
+        let dataCtrl = require("./controllers/data");
 
-	app.get(["/*"], dataCtrl.findByHash(req, res));
+    	app.get(["/*"], dataCtrl.getData);
+    } catch(err) {
+        console.log(err);
+    }
 });
 
 app.listen(3001);
