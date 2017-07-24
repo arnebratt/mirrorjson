@@ -57,7 +57,7 @@ let addJson = function(req, res) {
             dataCtrl.storeData(req.get('host'), req.query.path, req.query.jsondata);
             Data.find({site: req.get('host')}, function(err, results) {
                 if (results) {
-                    res.send("<pre>\n" + results.map(data => "\n" + data.hash + " => " + data.json.substring(0, 20)) + "</pre>\n");
+                    res.send("<pre>\n" + results.map(data => "\n" + data.hash + " => " + data.json.substring(0, 40)) + "...</pre>\n");
                 } else {
                     console.log(err);
                     return res.send("Error: Failed getting current site data for domain " + req.get('host'));
