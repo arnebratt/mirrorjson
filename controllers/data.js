@@ -62,6 +62,9 @@ let findByHash = function(site, path, res) {
 
 // Get json from external API, or the mirrored data in local MongoDB database
 exports.getData = function(req, res) {
+    // Give access to any site for these data
+    res.set("Access-Control-Allow-Origin", "*");
+
     getExternalUrl(req, res, function(url) {
         getExternalData(url, function(err, results, body) {
             if (results && results.statusCode === 200) {
