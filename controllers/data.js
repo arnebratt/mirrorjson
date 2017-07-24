@@ -5,7 +5,7 @@ let mongoose = require('mongoose'),
 let Data = mongoose.model('Data');
 
 // Save json from given path to database
-exports.storeData = function(site, path, json) {
+let storeData = function(site, path, json) {
     let hash = md5(path);
 
     Data.findOne({site: site, hash: hash}, function(err, results) {
@@ -20,6 +20,7 @@ exports.storeData = function(site, path, json) {
         }
     });
 }
+exports.storeData = storeData;
 
 // Generate external url based on current domain
 let getExternalUrl = function(req, res, callback) {
