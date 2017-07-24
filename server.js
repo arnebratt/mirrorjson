@@ -3,6 +3,11 @@ var express = require('express'),
     mongoose = require('mongoose'),
     port = 3001;
 
+require("./models/json");
+require("./models/domain_match");
+let dataCtrl = require("./controllers/data");
+let domainCtrl = require("./controllers/domains");
+
 process.argv.forEach(function (val, index, array) {
     if (val.indexOf("--port=") === 0) {
         let tmpPort = parseInt(val.split("=")[1]);
@@ -12,6 +17,9 @@ process.argv.forEach(function (val, index, array) {
             console.log("Error: --port parameter has the wrong format, exiting");
             process.exit();
         }
+    }
+    if (val === "--disable-external") {
+        dataCtrl.enableExternal(false);
     }
 });
 
@@ -24,11 +32,6 @@ promise.then(function (db) {
     });
 
     try {
-        require("./models/json");
-        require("./models/domain_match");
-        let dataCtrl = require("./controllers/data");
-        let domainCtrl = require("./controllers/domains");
-
         app.get(["/mirrorjson"], domainCtrl.adminDomainRegister);
         app.get(["/*"], dataCtrl.getData);
     } catch(err) {
@@ -38,9 +41,10 @@ promise.then(function (db) {
 
 app.listen(port);
 
-console.log("> node server.js [--port=<port>]");
+console.log("> node server.js [--port=<port>] [--disable-external]");
 console.log("");
 console.log("Port must be between 0 and 65536. Default is 3001.");
+console.log("When --disable-external is set, only local database data is returned.");
 console.log("");
 console.log("Listening on port " + port);
 console.log("");

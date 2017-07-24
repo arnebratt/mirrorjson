@@ -3,6 +3,12 @@ let mongoose = require('mongoose'),
     request = require('request');
 
 let Data = mongoose.model('Data');
+let enableExternal = true;
+
+// Enable or disable the use of external data (when disabled will only return data from Mongo DB)
+exports.enableExternal = function(useExternal) {
+    enableExternal = useExternal;
+};
 
 // Save json from given path to database
 let storeData = function(site, path, json) {
@@ -65,14 +71,18 @@ exports.getData = function(req, res) {
     // Give access to any site for these data
     res.set("Access-Control-Allow-Origin", "*");
 
-    getExternalUrl(req, res, function(url) {
-        getExternalData(url, function(err, results, body) {
-            if (results && results.statusCode === 200) {
-                storeData(req.get('host'), req.originalUrl, body);
-                return res.send(JSON.parse(body));
-            } else {
-                findByHash(req.get('host'), req.originalUrl, res);
-            }
+    if (enableExternal) {
+        getExternalUrl(req, res, function(url) {
+            getExternalData(url, function(err, results, body) {
+                if (results && results.statusCode === 200) {
+                    storeData(req.get('host'), req.originalUrl, body);
+                    return res.send(JSON.parse(body));
+                } else {
+                    findByHash(req.get('host'), req.originalUrl, res);
+                }
+            });
         });
-    });
+    } else {
+        findByHash(req.get('host'), req.originalUrl, res);
+    }
 }
