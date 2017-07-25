@@ -43,12 +43,33 @@ let getExternalUrl = function(req, res, callback) {
     });
 }
 
+// Get HTTP POST parameters
+let getPostBody = function(req, callback) {
+    let rawBody = '';
+    req.on("data",function(chunk){
+        rawBody += chunk.toString();
+    });
+    req.on("end", function() {
+        let regexp = /^Content\-Disposition\: form\-data\; name\=\"(.*?)\"$/;
+        let params = rawBody.split("------------------------------").map(str => {
+            let lines = str.split("\r\n");
+            return (lines.length > 3) ? regexp.exec(lines[1])[1] + "=" + lines[3] : '';
+        }).filter(str => str);
+        req.jsonBody = params.join("&");
+        callback()
+    });
+}
+
 // Fetch json data from external API
-let getExternalData = function(url, callback) {
+let postExternalData = function(url, body, callback) {
     let options = {
         uri : url,
-        method : 'GET'
-    };
+        method : (body !== "") ? 'POST' : 'GET'
+    }
+    if (body !== "") {
+        options.headers = {'content-type' : 'application/x-www-form-urlencoded'};
+        options.body = body
+    }
     request(options, callback);
 }
 
@@ -58,7 +79,11 @@ let findByHash = function(site, path, res) {
 
     Data.findOne({site: site, hash: hash}, function(err, results) {
         if (results) {
-            return res.send(JSON.parse(results.json));
+            try {
+                return res.send(JSON.parse(results.json));
+            } catch(e) {
+                res.send("Error: json data conversion failed for :\n" + results.json);
+            }
         } else {
             console.log(err);
             return res.send("Error: No data found on " + path);
@@ -67,22 +92,30 @@ let findByHash = function(site, path, res) {
 }
 
 // Get json from external API, or the mirrored data in local MongoDB database
-exports.getData = function(req, res) {
+exports.postData = function(req, res) {
     // Give access to any site for these data
     res.set("Access-Control-Allow-Origin", "*");
 
-    if (enableExternal) {
-        getExternalUrl(req, res, function(url) {
-            getExternalData(url, function(err, results, body) {
-                if (results && results.statusCode === 200) {
-                    storeData(req.get('host'), req.originalUrl, body);
-                    return res.send(JSON.parse(body));
-                } else {
-                    findByHash(req.get('host'), req.originalUrl, res);
-                }
+    getPostBody(req, function() {
+        let path = req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
+        if (enableExternal) {
+            getExternalUrl(req, res, function(url) {
+                postExternalData(url, req.jsonBody, function(err, results, body) {
+                    if (results && results.statusCode === 200) {
+                        try {
+                            let json = JSON.parse(body);
+                            storeData(req.get('host'), path, body);
+                            return res.send(json);
+                        } catch(e) {
+                            res.send("Error: json data conversion failed for :\n" + body);
+                        }
+                    } else {
+                        findByHash(req.get('host'), path, res);
+                    }
+                });
             });
-        });
-    } else {
-        findByHash(req.get('host'), req.originalUrl, res);
-    }
+        } else {
+            findByHash(req.get('host'), path, res);
+        }
+    });
 }

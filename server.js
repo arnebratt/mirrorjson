@@ -8,6 +8,7 @@ require("./models/domain_match");
 let dataCtrl = require("./controllers/data");
 let domainCtrl = require("./controllers/domains");
 
+// Check command line parameters
 process.argv.forEach(function (val, index, array) {
     if (val.indexOf("--port=") === 0) {
         let tmpPort = parseInt(val.split("=")[1]);
@@ -23,6 +24,7 @@ process.argv.forEach(function (val, index, array) {
     }
 });
 
+// Connect to Mongo DB database
 var mongoUri = 'mongodb://localhost/test';
 var promise = mongoose.connect(mongoUri, {useMongoClient: true});
 
@@ -32,13 +34,16 @@ promise.then(function (db) {
     });
 
     try {
+        // Connect routes with controllers
         app.get(["/mirrorjson"], domainCtrl.adminDomainRegister);
-        app.get(["/*"], dataCtrl.getData);
+        app.get(["/*"], dataCtrl.postData);
+        app.post(["/*"], dataCtrl.postData);
     } catch(err) {
         console.log(err);
     }
 });
 
+// Start server on selected port
 app.listen(port);
 
 console.log("> node server.js [--port=<port>] [--disable-external]");
