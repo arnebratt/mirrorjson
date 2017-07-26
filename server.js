@@ -35,6 +35,8 @@ promise.then(function (db) {
 
     try {
         // Connect routes with controllers
+        app.get(["/mirrorjson/:domain/:hash"], domainCtrl.adminDomainRegister);
+        app.get(["/mirrorjson/:domain"], domainCtrl.adminDomainRegister);
         app.get(["/mirrorjson"], domainCtrl.adminDomainRegister);
         app.get(["/*"], dataCtrl.postData);
         app.post(["/*"], dataCtrl.postData);

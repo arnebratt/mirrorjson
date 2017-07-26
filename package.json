@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.15.3",
+    "handlebars": "^4.0.10",
     "md5": "^2.2.1",
     "mongoose": "^4.11.3",
     "request": "^2.81.0"

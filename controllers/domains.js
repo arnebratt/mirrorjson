@@ -1,12 +1,18 @@
 let mongoose = require('mongoose');
+let handlebars = require('handlebars');
 
 let Domain = mongoose.model('Domain');
 
+let domainListTpl = require('../templates/domainlist.handlebars');
+let status = "";
+
 // List all domains registered in the database
 let listDomains = function(req, res) {
+//    let query = Domain.find({}).select
     Domain.find({}, function(err, results) {
         if (results) {
-            res.send("<pre>\n" + results.map(domain => "\n" + domain.localDomain + " <= " + domain.remoteDomain) + "</pre>\n");
+            let template = handlebars.compile(domainListTpl.tpl());
+            res.send(template({results: results, currentDomain: req.get('host'), status: status}));
         } else {
             console.log(err);
             return res.send("Error: Failed getting domains list");
@@ -27,6 +33,7 @@ let updateDomain = function(req, res) {
         if (results) {
             Domain.update({localDomain: req.get('host')}, {$set: {remoteDomain: req.query.domain}}, function (err, numberAffected) {
                 if (!err) {
+                    status = "Added a new domain to " + req.get('host');
                     listDomains(req, res);
                 } else {
                     console.log(err);
@@ -36,10 +43,28 @@ let updateDomain = function(req, res) {
         } else {
             Domain.create({localDomain: req.get('host'), remoteDomain: req.query.domain}, function (err, domain) {
                 if (domain) {
+                    status = "Updated the domain to " + req.get('host');
                     listDomains(req, res);
                 } else {
                     console.log(err);
                     return res.send("Error: Failed creating domain reference for " + req.query.domain);
+                }
+            });
+        }
+    });
+}
+
+// Remove the current domains document
+let removeDomain = function(req, res) {
+    getDomain(req.get('host'), req, res, results => {
+        if (results) {
+            Domain.remove({localDomain: req.get('host')}, function (err, writeOpResult) {
+                if (!err) {
+                    status = "Removed the domain to " + req.get('host');
+                    listDomains(req, res);
+                } else {
+                    console.log(err);
+                    return res.send("Error: Failed removing domain reference for " + req.get('host'));
                 }
             });
         }
@@ -72,8 +97,11 @@ let addJson = function(req, res) {
 }
 
 exports.adminDomainRegister = function(req, res) {
+    status = "";
     if (req.query.domain) {
         updateDomain(req, res);
+    } else if (req.query.remove_domain) {
+        removeDomain(req, res);
     } else if (req.query.jsondata) {
         addJson(req, res);
     } else {
