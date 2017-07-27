@@ -1,10 +1,11 @@
 var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+    Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
 
 var DataSchema = new Schema({
-    site: {type: String, index: true},
+    domainId: {type: ObjectId, ref: "Domain", index: true},
     hash: {type: String, index: true},
     json: {type: String}
-}, { collection: 'mirrorjson_api_data' });
+}, { collection: 'mirrorjson_api_data2' });
 
 mongoose.model('Data', DataSchema);
