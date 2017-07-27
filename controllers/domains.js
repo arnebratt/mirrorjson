@@ -4,6 +4,8 @@ let handlebars = require('handlebars');
 let Domain = mongoose.model('Domain');
 let Data = mongoose.model('Data');
 
+let headerTpl = require('../templates/header.handlebars');
+let footerTpl = require('../templates/footer.handlebars');
 let domainListTpl = require('../templates/domainlist.handlebars');
 
 // List all domains registered in the database
@@ -104,7 +106,7 @@ let addJson = function(req, res) {
     }
 }
 
-exports.adminDomainRegister = function(req, res) {
+exports.adminDomainList = function(req, res) {
     if (req.query.domain) {
         updateDomain(req, res);
     } else if (req.query.remove_domain) {
