@@ -1,4 +1,5 @@
 let tpl = `
+<!DOCTYPE HTML>
 <html>
     <head>
         <title>MirrorJson Admin</title>

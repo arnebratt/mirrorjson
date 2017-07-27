@@ -24,6 +24,18 @@ let listElements = function(req, res, status = "") {
     });
 }
 
+exports.adminJsonEditor = function(req, res) {
+    Data.findOne({hash: req.params.hash}, function(err, currentData) {
+        if (currentData) {
+            let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
+            let template = handlebars.compile(jsonEditorTpl.tpl());
+            res.send(template({json: currentData.json, domain: req.params.domain}));
+        } else {
+            return res.send("Error: Requested data not found, " + req.params.hash)
+        }
+    });
+}
+
 exports.adminElementsList = function(req, res) {
     listElements(req, res);
 }

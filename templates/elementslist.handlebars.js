@@ -1,10 +1,10 @@
 let tpl = `
-<h2>{{selectedDomain}}</h2>
+<h2><a href="/mirrorjson">{{selectedDomain}}</a></h2>
 
 <ul>
     {{#results}}
         <li>
-            <a href="./{{../selectedDomain}}/{{hash}}">{{hash}}</a>
+            <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}">{{hash}}</a>
             =>
             {{json}}
         </li>
