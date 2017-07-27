@@ -75,17 +75,24 @@ let removeDomain = function(req, res) {
 let addJson = function(req, res) {
     let dataCtrl = require("../controllers/data");
     let Data = mongoose.model('Data');
+    let ObjectId = require('mongoose').Types.ObjectId;
 
     if (req.query.path) {
         try {
             JSON.parse(req.query.jsondata);
-            dataCtrl.storeData(req.get('host'), req.query.path, req.query.jsondata);
-            Data.find({site: req.get('host')}, function(err, results) {
-                if (results) {
-                    res.send("<pre>\n" + results.map(data => "\n" + data.hash + " => " + data.json.substring(0, 40)) + "...</pre>\n");
+            Domain.findOne({localDomain: req.get('host')}, "_id", function(err, currentSite) {
+                if (currentSite) {
+                    dataCtrl.storeData(req.get('host'), req.query.path, req.query.jsondata);
+                    Data.find({domainId: new ObjectId(currentSite._id)}, function(err, results) {
+                        if (results) {
+                            res.send("<pre>\n" + results.map(data => "\n" + data.hash + " => " + data.json.substring(0, 40)) + "...</pre>\n");
+                        } else {
+                            console.log(err);
+                            return res.send("Error: Failed getting current site data for domain " + req.get('host'));
+                        }
+                    });
                 } else {
-                    console.log(err);
-                    return res.send("Error: Failed getting current site data for domain " + req.get('host'));
+                    return res.send("Error: Local domain not registered, " + req.get('host'))
                 }
             });
         } catch(e) {

@@ -13,15 +13,20 @@ exports.enableExternal = function(useExternal) {
 // Save json from given path to database
 let storeData = function(site, path, json) {
     let hash = md5(path);
+    let Domain = mongoose.model('Domain');
 
-    Data.findOne({site: site, hash: hash}, function(err, results) {
-        if (results) {
-            Data.update({_id: results._id}, {$set: {json: json}}, function (err, numberAffected) {
-                console.log('Updated %d documents...', numberAffected.nModified, err);
-            });
-        } else {
-            Data.create({site: site, hash: hash, json: json}, function(err, data) {
-                console.log('Created new document...', err);
+    Domain.findOne({localDomain: site}, "_id", function(err, currentSite) {
+        if (currentSite) {
+            Data.findOne({domainId: currentSite._id, hash: hash}, function(err, results) {
+                if (results) {
+                    Data.update({_id: results._id}, {$set: {json: json}}, function (err, numberAffected) {
+                        console.log('Updated %d documents...', numberAffected.nModified, err);
+                    });
+                } else {
+                    Data.create({domainId: currentSite._id, hash: hash, json: json}, function(err, data) {
+                        console.log('Created new document...', err);
+                    });
+                }
             });
         }
     });
@@ -76,17 +81,24 @@ let postExternalData = function(url, body, callback) {
 // Get json data from database based on given path and current site
 let findByHash = function(site, path, res) {
     let hash = md5(path);
+    let Domain = mongoose.model('Domain');
 
-    Data.findOne({site: site, hash: hash}, function(err, results) {
-        if (results) {
-            try {
-                return res.send(JSON.parse(results.json));
-            } catch(e) {
-                res.send("Error: json data conversion failed for :\n" + results.json);
-            }
+    Domain.findOne({localDomain: site}, "_id", function(err, currentSite) {
+        if (currentSite) {
+            Data.findOne({domainId: currentSite._id, hash: hash}, function(err, results) {
+                if (results) {
+                    try {
+                        return res.send(JSON.parse(results.json));
+                    } catch(e) {
+                        res.send("Error: json data conversion failed for :\n" + results.json);
+                    }
+                } else {
+                    console.log(err);
+                    return res.send("Error: No data found on " + path);
+                }
+            });
         } else {
-            console.log(err);
-            return res.send("Error: No data found on " + path);
+            return res.send("Error: Local domain not registered, " + site)
         }
     });
 }
