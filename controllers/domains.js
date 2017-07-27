@@ -2,17 +2,22 @@ let mongoose = require('mongoose');
 let handlebars = require('handlebars');
 
 let Domain = mongoose.model('Domain');
+let Data = mongoose.model('Data');
 
 let domainListTpl = require('../templates/domainlist.handlebars');
-let status = "";
 
 // List all domains registered in the database
-let listDomains = function(req, res) {
-//    let query = Domain.find({}).select
+let listDomains = function(req, res, status = "") {
     Domain.find({}, function(err, results) {
         if (results) {
-            let template = handlebars.compile(domainListTpl.tpl());
-            res.send(template({results: results, currentDomain: req.get('host'), status: status}));
+            let currentDomain = results.find(domain => domain.localDomain === req.get('host'));
+            Data.aggregate({$group: {_id: {domainId: "$domainId"}, elementsCount: {$sum: 1}}}, function(err, aggrResults) {
+                let countDocs = {};
+                aggrResults.map(aggr => {countDocs[aggr._id.domainId] = aggr.elementsCount});
+
+                let template = handlebars.compile(domainListTpl.tpl());
+                res.send(template({results: results, countDocs: countDocs, currentDomain: currentDomain, status: status}));
+            });
         } else {
             console.log(err);
             return res.send("Error: Failed getting domains list");
@@ -33,8 +38,7 @@ let updateDomain = function(req, res) {
         if (results) {
             Domain.update({localDomain: req.get('host')}, {$set: {remoteDomain: req.query.domain}}, function (err, numberAffected) {
                 if (!err) {
-                    status = "Added a new domain to " + req.get('host');
-                    listDomains(req, res);
+                    listDomains(req, res, "Added a new domain to " + req.get('host'));
                 } else {
                     console.log(err);
                     return res.send("Error: Failed updating domain reference for " + req.query.domain);
@@ -43,8 +47,7 @@ let updateDomain = function(req, res) {
         } else {
             Domain.create({localDomain: req.get('host'), remoteDomain: req.query.domain}, function (err, domain) {
                 if (domain) {
-                    status = "Updated the domain to " + req.get('host');
-                    listDomains(req, res);
+                    listDomains(req, res, "Updated the domain to " + req.get('host'));
                 } else {
                     console.log(err);
                     return res.send("Error: Failed creating domain reference for " + req.query.domain);
@@ -60,8 +63,7 @@ let removeDomain = function(req, res) {
         if (results) {
             Domain.remove({localDomain: req.get('host')}, function (err, writeOpResult) {
                 if (!err) {
-                    status = "Removed the domain to " + req.get('host');
-                    listDomains(req, res);
+                    listDomains(req, res, "Removed the domain to " + req.get('host'));
                 } else {
                     console.log(err);
                     return res.send("Error: Failed removing domain reference for " + req.get('host'));
@@ -74,7 +76,6 @@ let removeDomain = function(req, res) {
 // Add json data for the current domain and specified path
 let addJson = function(req, res) {
     let dataCtrl = require("../controllers/data");
-    let Data = mongoose.model('Data');
     let ObjectId = require('mongoose').Types.ObjectId;
 
     if (req.query.path) {
@@ -104,7 +105,6 @@ let addJson = function(req, res) {
 }
 
 exports.adminDomainRegister = function(req, res) {
-    status = "";
     if (req.query.domain) {
         updateDomain(req, res);
     } else if (req.query.remove_domain) {
