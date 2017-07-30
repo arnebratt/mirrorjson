@@ -10,8 +10,8 @@ let tpl = `
 </head>
 <body>
     <form action="/mirrorjson/{{domain}}" method="GET">
-        <input type="submit" name="StoreJson" value="Save Json" />
-        <input type="button" value="Cancel changes" />
+        <input id="save" type="button" name="StoreJson" value="Save Json" />
+        <input id="cancel" type="button" value="Cancel changes" />
     </form>
     <div id="jsoneditor" style="width: 600px; height: 800px;"></div>
 
@@ -25,6 +25,15 @@ let tpl = `
 
         // set json
         editor.set({{{json}}});
+
+        function save() {
+            window.location.href = "/mirrorjson/{{domain}}?hash={{hash}}&jsondata=" + JSON.stringify(editor.get());
+        }
+        function cancel() {
+            window.location.href = "/mirrorjson/{{domain}}";
+        }
+        document.getElementById("save").addEventListener("click", save);
+        document.getElementById("cancel").addEventListener("click", cancel);
     </script>
 </body>
 </html>

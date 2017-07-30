@@ -75,44 +75,11 @@ let removeDomain = function(req, res) {
     });
 }
 
-// Add json data for the current domain and specified path
-let addJson = function(req, res) {
-    let dataCtrl = require("../controllers/data");
-    let ObjectId = require('mongoose').Types.ObjectId;
-
-    if (req.query.path) {
-        try {
-            JSON.parse(req.query.jsondata);
-            Domain.findOne({localDomain: req.get('host')}, "_id", function(err, currentSite) {
-                if (currentSite) {
-                    dataCtrl.storeData(req.get('host'), req.query.path, req.query.jsondata);
-                    Data.find({domainId: new ObjectId(currentSite._id)}, function(err, results) {
-                        if (results) {
-                            res.send("<pre>\n" + results.map(data => "\n" + data.hash + " => " + data.json.substring(0, 40)) + "...</pre>\n");
-                        } else {
-                            console.log(err);
-                            return res.send("Error: Failed getting current site data for domain " + req.get('host'));
-                        }
-                    });
-                } else {
-                    return res.send("Error: Local domain not registered, " + req.get('host'))
-                }
-            });
-        } catch(e) {
-            res.send("Error: json data conversion failed for :\n" + req.query.jsondata);
-        }
-    } else {
-        res.send("Error: Missing path information");
-    }
-}
-
 exports.adminDomainList = function(req, res) {
     if (req.query.domain) {
         updateDomain(req, res);
     } else if (req.query.remove_domain) {
         removeDomain(req, res);
-    } else if (req.query.jsondata) {
-        addJson(req, res);
     } else {
         listDomains(req, res);
     }

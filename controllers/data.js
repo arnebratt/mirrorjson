@@ -11,8 +11,7 @@ exports.enableExternal = function(useExternal) {
 };
 
 // Save json from given path to database
-let storeData = function(site, path, json) {
-    let hash = md5(path);
+let storeData = function(site, hash, json, callback) {
     let Domain = mongoose.model('Domain');
 
     Domain.findOne({localDomain: site}, "_id", function(err, currentSite) {
@@ -21,10 +20,16 @@ let storeData = function(site, path, json) {
                 if (results) {
                     Data.update({_id: results._id}, {$set: {json: json}}, function (err, numberAffected) {
                         console.log('Updated %d documents...', numberAffected.nModified, err);
+                        if (callback) {
+                            callback(err, numberAffected);
+                        }
                     });
                 } else {
                     Data.create({domainId: currentSite._id, hash: hash, json: json}, function(err, data) {
                         console.log('Created new document...', err);
+                        if (callback) {
+                            callback();
+                        }
                     });
                 }
             });
@@ -116,7 +121,7 @@ exports.postData = function(req, res) {
                     if (results && results.statusCode === 200) {
                         try {
                             let json = JSON.parse(body);
-                            storeData(req.get('host'), path, body);
+                            storeData(req.get('host'), md5(path), body);
                             return res.send(json);
                         } catch(e) {
                             res.send("Error: json data conversion failed for :\n" + body);

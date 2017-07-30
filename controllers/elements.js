@@ -24,12 +24,37 @@ let listElements = function(req, res, status = "") {
     });
 }
 
+// Add json data for the current domain and specified hash
+let addJson = function(req, res) {
+    let dataCtrl = require("../controllers/data");
+    let ObjectId = require('mongoose').Types.ObjectId;
+
+    if (req.query.hash) {
+        try {
+            JSON.parse(req.query.jsondata);
+            Domain.findOne({localDomain: req.get('host')}, "_id", function(err, currentSite) {
+                if (currentSite) {
+                    dataCtrl.storeData(req.get('host'), req.query.hash, req.query.jsondata, function(err, numberAffected) {
+                        listElements(req, res, "Json stored for hash " + req.query.hash);
+                    });
+                } else {
+                    return res.send("Error: Local domain not registered, " + req.get('host'))
+                }
+            });
+        } catch(e) {
+            res.send("Error: json data conversion failed for :\n" + req.query.jsondata);
+        }
+    } else {
+        res.send("Error: Missing hash information");
+    }
+}
+
 exports.adminJsonEditor = function(req, res) {
     Data.findOne({hash: req.params.hash}, function(err, currentData) {
         if (currentData) {
             let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
             let template = handlebars.compile(jsonEditorTpl.tpl());
-            res.send(template({json: currentData.json, domain: req.params.domain}));
+            res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain}));
         } else {
             return res.send("Error: Requested data not found, " + req.params.hash)
         }
@@ -37,5 +62,9 @@ exports.adminJsonEditor = function(req, res) {
 }
 
 exports.adminElementsList = function(req, res) {
-    listElements(req, res);
+    if (req.query.jsondata) {
+        addJson(req, res);
+    } else {
+        listElements(req, res);
+    }
 }
