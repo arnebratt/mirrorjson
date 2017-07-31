@@ -25,39 +25,21 @@ Setup
 Usage
 =====
 
-MirrorJson matches whatever domain/port combination you call it with (default "localhost:3001") to an external API domain.
+MirrorJson matches whatever domain/port combination you call it from (default "localhost:3001") to an external API.
 First you need to configure which external domain it should match with. Then you can open [http://localhost:3001](http://localhost:3001)
 and it will return the json data from that external domain, matching any path or query parameters you add.
 
-You will find an extremely simple administration interface at [http://localhost:3001/mirrorjson](http://localhost:3001/mirrorjson).
-
-By default it lists any domains configured. It also takes a couple of query parameters...
-
-Parameter "domain"
-------
-
-Example: [http://localhost:3001/mirrorjson?domain=api.randomdomain.com](http://localhost:3001/mirrorjson?domain=api.randomdomain.com)
-
-"domain" will add the specified domain to the database, matching it with your current domain and port
-(which for our example is "localhost:3001").
-
-The example url will show one element in the list, the newly added domain, as such:
+You will find a simple administration interface at [http://localhost:3001/mirrorjson](http://localhost:3001/mirrorjson),
+where you can specify the address for your external API. For instance, if you add the domain 'api.randomdomain.com' here,
+it will show this match in the list:
 
     localhost:3001 <= api.randomdomain.com
 
-This means that when you call or view [http://localhost:3001](http://localhost:3001), it will give you the json data
-coming from api.randomdomain.com, mirroring whatever path you specify in the url.
-Whenever the api.randomdomain.com server is unavailable, it will return cached data.
+Then you can open [http://localhost:3001](http://localhost:3001), and get whatever json the API at
+api.randomdomain.com returns, or open [http://localhost:3001/test](http://localhost:3001/test) to get
+the json from http://api.randomdomain.com/test . After these urls are called the first time, you can disable
+your internet access and still receive the json data from them.
 
-Parameter "jsondata"
---------
-
-Example: [http://localhost:3001/mirrorjson/?path=/test&jsondata={"id": "test","name": "Test 1"}](http://localhost:3001/mirrorjson/?path=/test&jsondata={%22id%22:%20%22test%22,%22name%22:%20%22Test%201%22})
-
-"jsondata" will add the json data specified in the url to the database manually, without checking with the external server.
-This way, you can manually configure whatever data is returned to your frontend client. The data must be valid json.
-
-It requires an extra parameter "path" to specify the path that should return the given json data.
-
-After running the example url here, you can open [http://localhost:3001/test](http://localhost:3001/test) and get
-the following result: '{"id":"test","name":"Test 1"}'
+You can also manually set json code on any specified path, and let MirrorJson return your json data instead of
+the data from external server. Or edit the json that comes from external server before it is sent to your frontend
+system.

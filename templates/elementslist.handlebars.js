@@ -11,7 +11,7 @@ let tpl = `
     {{/results}}
 </ul>
 
-<h2>Add a json string manually for selected path on '{{selectedDomain}}'</h2>
+<h2>Add a json string manually for specified path on '{{selectedDomain}}'</h2>
 <p>
     <form method="GET" action="/mirrorjson/{{selectedDomain}}">
         <label>Path:</label>
