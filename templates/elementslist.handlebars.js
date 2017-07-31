@@ -10,6 +10,19 @@ let tpl = `
         </li>
     {{/results}}
 </ul>
+
+<h2>Add a json string manually for selected path on '{{selectedDomain}}'</h2>
+<p>
+    <form method="GET" action="/mirrorjson/{{selectedDomain}}">
+        <label>Path:</label>
+        <input type="text" name="path" value="/" />
+        <br />
+        <label>Json:</label>
+         <textarea name="jsondata" rows="10" cols="80"></textarea>
+         <br />
+        <input type="submit" value="Save element" />
+    </form>
+</p>
 `;
 
 let headerTpl = require('../templates/header.handlebars');

@@ -12,7 +12,7 @@ let tpl = `
 
 <h2>Add a new domain for '{{currentDomain.localDomain}}'</h2>
 <p>
-    <form method="GET" action=".">
+    <form method="GET" action="/mirrorjson">
         <label>Domain:</label>
         <input type="text" name="domain" value="{{currentDomain.remoteDomain}}" />
         <input type="submit" value="Save domain" />

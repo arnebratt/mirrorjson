@@ -1,5 +1,6 @@
-let mongoose = require('mongoose');
-let handlebars = require('handlebars');
+let mongoose = require('mongoose'),
+    handlebars = require('handlebars')
+    md5 = require('md5');
 
 let Domain = mongoose.model('Domain');
 let Data = mongoose.model('Data');
@@ -28,14 +29,20 @@ let listElements = function(req, res, status = "") {
 let addJson = function(req, res) {
     let dataCtrl = require("../controllers/data");
     let ObjectId = require('mongoose').Types.ObjectId;
+    let hash = undefined;
 
-    if (req.query.hash) {
+    if (req.query.path) {
+        hash = md5(decodeURI(req.query.path));
+    } else if (req.query.hash) {
+        hash = req.query.hash;
+    }
+    if (hash) {
         try {
             JSON.parse(req.query.jsondata);
             Domain.findOne({localDomain: req.get('host')}, "_id", function(err, currentSite) {
                 if (currentSite) {
-                    dataCtrl.storeData(req.get('host'), req.query.hash, req.query.jsondata, function(err, numberAffected) {
-                        listElements(req, res, "Json stored for hash " + req.query.hash);
+                    dataCtrl.storeData(req.get('host'), hash, req.query.jsondata, function(err, numberAffected) {
+                        listElements(req, res, "Json stored for hash " + hash);
                     });
                 } else {
                     return res.send("Error: Local domain not registered, " + req.get('host'))
@@ -45,7 +52,7 @@ let addJson = function(req, res) {
             res.send("Error: json data conversion failed for :\n" + req.query.jsondata);
         }
     } else {
-        res.send("Error: Missing hash information");
+        res.send("Error: Missing path information");
     }
 }
 
