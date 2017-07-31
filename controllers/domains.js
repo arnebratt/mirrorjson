@@ -18,7 +18,7 @@ let listDomains = function(req, res, status = "") {
                 aggrResults.map(aggr => {countDocs[aggr._id.domainId] = aggr.elementsCount});
 
                 let template = handlebars.compile(domainListTpl.tpl());
-                res.send(template({results: results, countDocs: countDocs, currentDomain: currentDomain, status: status}));
+                res.send(template({results: results, countDocs: countDocs, currentLocal: req.get('host'), currentRemote: (currentDomain ? currentDomain.remoteDomain : undefined), status: status}));
             });
         } else {
             console.log(err);
