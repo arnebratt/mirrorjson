@@ -7,6 +7,7 @@ require("./models/json");
 require("./models/domain_match");
 let dataCtrl = require("./controllers/data");
 let domainCtrl = require("./controllers/domains");
+let elementsCtrl = require("./controllers/elements");
 
 // Check command line parameters
 process.argv.forEach(function (val, index, array) {
@@ -34,8 +35,12 @@ promise.then(function (db) {
     });
 
     try {
+        app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
+
         // Connect routes with controllers
-        app.get(["/mirrorjson"], domainCtrl.adminDomainRegister);
+        app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
+        app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
+        app.get(["/mirrorjson"], domainCtrl.adminDomainList);
         app.get(["/*"], dataCtrl.postData);
         app.post(["/*"], dataCtrl.postData);
     } catch(err) {
