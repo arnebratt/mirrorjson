@@ -38,6 +38,7 @@ promise.then(function (db) {
         app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
 
         // Connect routes with controllers
+        app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
         app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
         app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
         app.get(["/mirrorjson"], domainCtrl.adminDomainList);

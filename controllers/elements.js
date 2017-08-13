@@ -56,6 +56,37 @@ let addJson = function(req, res) {
     }
 }
 
+let exportJson = function(req, res) {
+    Domain.findOne({localDomain: req.params.domain}, "_id", function(err, currentSite) {
+        if (currentSite) {
+            Data.find({domainId: currentSite._id}, "hash json", function(err, results) {
+                let docs = results.map(data => {
+                    try {
+                        return {hash: data.hash, json: JSON.parse(data.json)}
+                    } catch(e) {
+                        res.send("Error: json data conversion failed for :\n" + data.json);
+                    }
+                });
+
+                res.setHeader('Content-disposition', 'attachment; filename=mirrorjson.json');
+                res.set("Content-Type", "application/json");
+                res.send(docs);
+            });
+        } else {
+            return res.send("Error: Local domain not registered, " + site)
+        }
+    });
+}
+
+exports.adminElementsImport = function(req, res) {
+    if (req.query.jsonfile) {
+    } else {
+        let jsonEditorTpl = require('../templates/elementsimport.handlebars');
+        let template = handlebars.compile(jsonEditorTpl.tpl());
+        res.send(template({selectedDomain: req.params.domain}));
+    }
+}
+
 exports.adminJsonEditor = function(req, res) {
     Data.findOne({hash: req.params.hash}, function(err, currentData) {
         if (currentData) {
@@ -71,6 +102,8 @@ exports.adminJsonEditor = function(req, res) {
 exports.adminElementsList = function(req, res) {
     if (req.query.jsondata) {
         addJson(req, res);
+    } else if (req.query.export) {
+        exportJson(req, res);
     } else {
         listElements(req, res);
     }
