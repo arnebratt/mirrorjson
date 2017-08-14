@@ -38,21 +38,21 @@ let getDomain = function(domain, req, res, callback) {
 let updateDomain = function(req, res) {
     getDomain(req.get('host'), req, res, results => {
         if (results) {
-            Domain.update({localDomain: req.get('host')}, {$set: {remoteDomain: req.query.domain}}, function (err, numberAffected) {
+            Domain.update({localDomain: req.get('host')}, {$set: {remoteDomain: req.body.domain}}, function (err, numberAffected) {
                 if (!err) {
                     listDomains(req, res, "Added a new domain to " + req.get('host'));
                 } else {
                     console.log(err);
-                    return res.send("Error: Failed updating domain reference for " + req.query.domain);
+                    return res.send("Error: Failed updating domain reference for " + req.body.domain);
                 }
             });
         } else {
-            Domain.create({localDomain: req.get('host'), remoteDomain: req.query.domain}, function (err, domain) {
+            Domain.create({localDomain: req.get('host'), remoteDomain: req.body.domain}, function (err, domain) {
                 if (domain) {
                     listDomains(req, res, "Updated the domain to " + req.get('host'));
                 } else {
                     console.log(err);
-                    return res.send("Error: Failed creating domain reference for " + req.query.domain);
+                    return res.send("Error: Failed creating domain reference for " + req.body.domain);
                 }
             });
         }
@@ -76,9 +76,9 @@ let removeDomain = function(req, res) {
 }
 
 exports.adminDomainList = function(req, res) {
-    if (req.query.domain) {
+    if (req.body.domain) {
         updateDomain(req, res);
-    } else if (req.query.remove_domain) {
+    } else if (req.body.remove_domain) {
         removeDomain(req, res);
     } else {
         listDomains(req, res);

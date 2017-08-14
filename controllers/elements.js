@@ -31,17 +31,17 @@ let addJson = function(req, res) {
     let ObjectId = require('mongoose').Types.ObjectId;
     let hash = undefined;
 
-    if (req.query.path) {
-        hash = md5(decodeURI(req.query.path));
-    } else if (req.query.hash) {
-        hash = req.query.hash;
+    if (req.body.path) {
+        hash = md5(decodeURI(req.body.path));
+    } else if (req.body.hash) {
+        hash = req.body.hash;
     }
     if (hash) {
         try {
-            JSON.parse(req.query.jsondata);
+            JSON.parse(req.body.jsondata);
             Domain.findOne({localDomain: req.get('host')}, "_id", function(err, currentSite) {
                 if (currentSite) {
-                    dataCtrl.storeData(req.get('host'), hash, req.query.jsondata, function(err, numberAffected) {
+                    dataCtrl.storeData(req.get('host'), hash, req.body.jsondata, function(err, numberAffected) {
                         listElements(req, res, "Json stored for hash " + hash);
                     });
                 } else {
@@ -49,7 +49,7 @@ let addJson = function(req, res) {
                 }
             });
         } catch(e) {
-            res.send("Error: json data conversion failed for :\n" + req.query.jsondata);
+            res.send("Error: json data conversion failed for :\n" + req.body.jsondata);
         }
     } else {
         res.send("Error: Missing path information");
@@ -79,7 +79,7 @@ let exportJson = function(req, res) {
 }
 
 exports.adminElementsImport = function(req, res) {
-    if (req.query.jsonfile) {
+    if (req.body.jsonfile) {
     } else {
         let jsonEditorTpl = require('../templates/elementsimport.handlebars');
         let template = handlebars.compile(jsonEditorTpl.tpl());
@@ -100,9 +100,9 @@ exports.adminJsonEditor = function(req, res) {
 }
 
 exports.adminElementsList = function(req, res) {
-    if (req.query.jsondata) {
+    if (req.body.jsondata) {
         addJson(req, res);
-    } else if (req.query.export) {
+    } else if (req.body.export) {
         exportJson(req, res);
     } else {
         listElements(req, res);

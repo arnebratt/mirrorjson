@@ -9,7 +9,9 @@ let tpl = `
     <script src="/jsoneditor/dist/jsoneditor.min.js"></script>
 </head>
 <body>
-    <form action="/mirrorjson/{{domain}}" method="GET">
+    <form id="saveform" action="/mirrorjson/{{domain}}" method="POST">
+        <input type="hidden" name="hash" value="{{hash}}" />
+        <input id="jsondata" type="hidden" name="jsondata" value="{{{json}}}" />
         <input id="save" type="button" name="StoreJson" value="Save Json" />
         <input id="cancel" type="button" value="Cancel changes" />
     </form>
@@ -27,7 +29,8 @@ let tpl = `
         editor.set({{{json}}});
 
         function save() {
-            window.location.href = "/mirrorjson/{{domain}}?hash={{hash}}&jsondata=" + JSON.stringify(editor.get());
+            document.getElementById('jsondata').value=JSON.stringify(editor.get());
+            document.getElementById('saveform').submit();
         }
         function cancel() {
             window.location.href = "/mirrorjson/{{domain}}";

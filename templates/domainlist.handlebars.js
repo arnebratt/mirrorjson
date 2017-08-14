@@ -16,7 +16,7 @@ let tpl = `
 
 <h2>Add a new external API domain for '{{currentLocal}}'</h2>
 <p>
-    <form method="GET" action="/mirrorjson">
+    <form method="POST" action="/mirrorjson">
         <label>Domain:</label>
         <input type="text" name="domain" value="{{currentRemote}}" />
         <input type="submit" value="Save domain" />
@@ -24,7 +24,7 @@ let tpl = `
 </p>
 {{#if currentRemote}}
     <p>
-        <form method="GET" action=".">
+        <form method="POST" action=".">
             <input type="submit" name="remove_domain" value="Remove current domain '{{currentRemote}}'" />
         </form>
     </p>

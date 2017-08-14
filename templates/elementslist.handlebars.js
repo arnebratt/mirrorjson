@@ -11,7 +11,7 @@ let tpl = `
     {{/results}}
 </ul>
 
-<form method="GET" action="/mirrorjson/{{selectedDomain}}">
+<form method="POST" action="/mirrorjson/{{selectedDomain}}">
     <input type="submit" name="export" value="Export listed documents" />
 </form>
 <form method="GET" action="/mirrorjson/{{selectedDomain}}/import">
@@ -20,7 +20,7 @@ let tpl = `
 
 <h2>Add a json string manually for specified path on '{{selectedDomain}}'</h2>
 <p>
-    <form method="GET" action="/mirrorjson/{{selectedDomain}}">
+    <form method="POST" action="/mirrorjson/{{selectedDomain}}">
         <label>Path:</label>
         <input type="text" name="path" value="/" />
         <br />
