@@ -1,5 +1,5 @@
 let tpl = `
-<h2><a href="/mirrorjson">{{selectedDomain}}</a></h2>
+<h2>{{selectedDomain}}</h2>
 
 <ul>
     {{#results}}

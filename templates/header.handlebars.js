@@ -5,7 +5,7 @@ let tpl = `
         <title>MirrorJson Admin</title>
     </head>
     <body>
-        <h1>MirrorJson Admin</h1>
+        <h1><a href="/mirrorjson">MirrorJson Admin</a></h1>
 
         <p>{{status}}</p>
 
