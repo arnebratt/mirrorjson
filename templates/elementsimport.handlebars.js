@@ -1,7 +1,7 @@
 let tpl = `
-<h2><a href="/mirrorjson/{{selectedDomain}}">Import json file to '{{selectedDomain}}'</a></h2>
+<h2>Import json file to '<a href="/mirrorjson/{{selectedDomain}}">{{selectedDomain}}</a>'</h2>
 <p>
-    <form method="GET" action="/mirrorjson/{{selectedDomain}}/import">
+    <form method="POST" action="/mirrorjson/{{selectedDomain}}/import">
         <label>File:</label>
         <input type="file" name="jsonfile" value="" accept=".json" />
         <input type="submit" value="Import from json file" />

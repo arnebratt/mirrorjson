@@ -2,6 +2,7 @@ var express = require('express'),
     app = express(),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
+    busboy = require('connect-busboy'),
     port = 3001;
 
 require("./models/json");
@@ -36,12 +37,14 @@ promise.then(function (db) {
     });
 
     try {
+        app.use(busboy());
         app.use(bodyParser.json()); // support json encoded bodies
         app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
         app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
 
         // Connect routes with controllers
+        app.post(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
         app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
         app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
         app.post(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);

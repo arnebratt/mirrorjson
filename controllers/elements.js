@@ -79,7 +79,19 @@ let exportJson = function(req, res) {
 }
 
 exports.adminElementsImport = function(req, res) {
+    console.log(req.body);
     if (req.body.jsonfile) {
+        req.pipe(req.busboy);
+        req.busboy.on('file', function (fieldname, file, filename) {
+            console.log("Uploading: " + filename);
+            console.log(file);
+            file.on('data', (chunk) => {
+                console.log(`Received ${chunk.length} bytes of data.`);
+            });
+        });
+        let jsonEditorTpl = require('../templates/elementsimport.handlebars');
+        let template = handlebars.compile(jsonEditorTpl.tpl());
+        res.send(template({selectedDomain: req.params.domain}));
     } else {
         let jsonEditorTpl = require('../templates/elementsimport.handlebars');
         let template = handlebars.compile(jsonEditorTpl.tpl());
