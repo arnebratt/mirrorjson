@@ -3,10 +3,10 @@ let tpl = `
     <ul>
         {{#results}}
             <li>
-                <a href="http://{{localDomain}}">{{localDomain}}</a>
+                <a href="http://{{localDomain}}/mirrorjson">{{localDomain}}</a>
                 <=
                 <a href="http://{{remoteDomain}}">{{remoteDomain}}</a>
-                (<a href="/mirrorjson/{{localDomain}}">{{#if (lookup ../countDocs this._id)}}{{lookup ../countDocs this._id}}{{else}}0{{/if}} stored elements</a>)
+                (<a href="/mirrorjson/{{localDomain}}">view {{#if (lookup ../countDocs this._id)}}{{lookup ../countDocs this._id}}{{else}}0{{/if}} stored elements</a>)
             </li>
         {{/results}}
     </ul>
@@ -14,7 +14,7 @@ let tpl = `
     <p>No external API registered</p>
 {{/if}}
 
-<h2>Add a new external API domain for '{{currentLocal}}'</h2>
+<h2>Set external API domain for '{{currentLocal}}'</h2>
 <p>
     <form method="POST" action="/mirrorjson">
         <label>Domain:</label>
@@ -25,7 +25,7 @@ let tpl = `
 {{#if currentRemote}}
     <p>
         <form method="POST" action="/mirrorjson">
-            <input type="submit" name="remove_domain" value="Remove current domain '{{currentRemote}}'" />
+            <input type="submit" name="remove_domain" value="Remove external domain '{{currentRemote}}'" />
         </form>
     </p>
 {{/if}}

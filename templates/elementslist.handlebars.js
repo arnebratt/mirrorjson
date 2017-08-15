@@ -19,17 +19,16 @@ let tpl = `
 </form>
 
 <h2>Add a json string manually for specified path on '{{selectedDomain}}'</h2>
-<p>
-    <form method="POST" action="/mirrorjson/{{selectedDomain}}">
-        <label>Path:</label>
-        <input type="text" name="path" value="/" />
-        <br />
-        <label>Json:</label>
-         <textarea name="jsondata" rows="10" cols="80"></textarea>
-         <br />
-        <input type="submit" value="Save element" />
-    </form>
-</p>
+<form method="POST" action="/mirrorjson/{{selectedDomain}}">
+    <p>Existing data for the path will be overwritten.</p>
+    <label>Path:</label>
+    <input type="text" name="path" value="/" />
+    <br />
+    <label>Json:</label>
+     <textarea name="jsondata" rows="10" cols="80"></textarea>
+     <br />
+    <input type="submit" value="Save element" />
+</form>
 `;
 
 let headerTpl = require('../templates/header.handlebars');

@@ -95,10 +95,10 @@ let findByHash = function(site, path, res) {
                     try {
                         return res.send(JSON.parse(results.json));
                     } catch(e) {
+                        console.log(e);
                         res.send("Error: json data conversion failed for :\n" + results.json);
                     }
                 } else {
-                    console.log(err);
                     return res.send("Error: No data found on " + path);
                 }
             });
@@ -124,6 +124,7 @@ exports.postData = function(req, res) {
                             storeData(req.get('host'), md5(path), body);
                             return res.send(json);
                         } catch(e) {
+                            console.log(e);
                             res.send("Error: json data conversion failed for :\n" + body);
                         }
                     } else {

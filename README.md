@@ -33,7 +33,7 @@ You will find a simple administration interface at [http://localhost:3001/mirror
 where you can specify the address for your external API. For instance, if you add the domain 'api.randomdomain.com' here,
 it will show this match in the list:
 
-    localhost:3001 <= api.randomdomain.com (0 stored elements)
+    localhost:3001 <= api.randomdomain.com (view 0 stored elements)
 
 Then you can open [http://localhost:3001](http://localhost:3001), and get whatever json the API at
 api.randomdomain.com returns, or open [http://localhost:3001/test](http://localhost:3001/test) to get
@@ -43,3 +43,13 @@ your internet access and still receive the json data from them.
 You can also manually set json code on any specified path, and let MirrorJson return your json data instead of
 the data from external server. Or edit the json that comes from external server before it is sent to your frontend
 system. By clicking on each stored element hash you come to the built in json editor.
+
+Todo
+====
+
+* Add path information to json model
+* Rename database from todays "test"
+* Add read only field to json model, to avoid update from server on edited json
+* Remove elements functionality
+* Add API prefix field to domain model
+* Fix Mongoose promise deprecation warning

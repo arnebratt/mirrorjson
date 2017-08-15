@@ -99,8 +99,8 @@ exports.adminElementsImport = function(req, res) {
                 let jsonEditorTpl = require('../templates/elementsimport.handlebars');
                 let template = handlebars.compile(jsonEditorTpl.tpl());
                 res.send(template({selectedDomain: req.params.domain, status: "Updated data from file " + filename}));
-            } catch(e) {
-                console.log(e);
+            } catch(err) {
+                console.log(err);
                 res.send("Error: json data conversion failed for :\n" + chunks.join(''));
             }
         });
