@@ -9,12 +9,13 @@ let elementsListTpl = require('../templates/elementslist.handlebars');
 
 // List all elements registered in the database for the selected domain
 let listElements = function(req, res, status = "") {
+    const SHOW_JSON_LENGTH = 600;
     Domain.findOne({localDomain: req.params.domain}, "_id", function(err, currentSite) {
         if (currentSite) {
             Data.find({domainId: currentSite._id}, function(err, results) {
                 let list = results.map(json => {return {
                     hash: json.hash,
-                    json: json.json.substring(0, 300) + (json.json.length > 300 ? "...+" + (json.json.length - 300) : "")
+                    json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
                 };});
                 let template = handlebars.compile(elementsListTpl.tpl());
                 res.send(template({results: list, selectedDomain: req.params.domain, status: status}));
@@ -114,13 +115,17 @@ exports.adminElementsImportPage = function(req, res) {
 }
 
 exports.adminJsonEditor = function(req, res) {
-    Data.findOne({hash: req.params.hash}, function(err, currentData) {
-        if (currentData) {
-            let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
-            let template = handlebars.compile(jsonEditorTpl.tpl());
-            res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain}));
-        } else {
-            return res.send("Error: Requested data not found, " + req.params.hash)
+    Domain.findOne({localDomain: req.params.domain}, "_id", function(err, currentSite) {
+        if (currentSite) {
+            Data.findOne({domainId: currentSite._id, hash: req.params.hash}, function(err, currentData) {
+                if (currentData) {
+                    let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
+                    let template = handlebars.compile(jsonEditorTpl.tpl());
+                    res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain}));
+                } else {
+                    return res.send("Error: Requested data not found, " + req.params.hash)
+                }
+            });
         }
     });
 }
