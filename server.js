@@ -45,7 +45,7 @@ promise.then(function (db) {
 
         // Connect routes with controllers
         app.post(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
-        app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
+        app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImportPage);
         app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
         app.post(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
         app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);

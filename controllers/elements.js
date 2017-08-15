@@ -79,24 +79,38 @@ let exportJson = function(req, res) {
 }
 
 exports.adminElementsImport = function(req, res) {
-    console.log(req.body);
-    if (req.body.jsonfile) {
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
-            console.log("Uploading: " + filename);
-            console.log(file);
-            file.on('data', (chunk) => {
-                console.log(`Received ${chunk.length} bytes of data.`);
-            });
+    req.pipe(req.busboy);
+    req.busboy.on('file', function (fieldname, file, filename) {
+        const chunks = [];
+
+        file.on("data", function (chunk) {
+            chunks.push(chunk);
         });
-        let jsonEditorTpl = require('../templates/elementsimport.handlebars');
-        let template = handlebars.compile(jsonEditorTpl.tpl());
-        res.send(template({selectedDomain: req.params.domain}));
-    } else {
-        let jsonEditorTpl = require('../templates/elementsimport.handlebars');
-        let template = handlebars.compile(jsonEditorTpl.tpl());
-        res.send(template({selectedDomain: req.params.domain}));
-    }
+
+        file.on("end", function () {
+            try {
+                let dataCtrl = require("../controllers/data");
+                let jsondata = JSON.parse(chunks.join(''));
+                jsondata.map(data => {
+                    dataCtrl.storeData(req.params.domain, data.hash, JSON.stringify(data.json), function(err, numberAffected) {
+                    });
+                });
+
+                let jsonEditorTpl = require('../templates/elementsimport.handlebars');
+                let template = handlebars.compile(jsonEditorTpl.tpl());
+                res.send(template({selectedDomain: req.params.domain, status: "Updated data from file " + filename}));
+            } catch(e) {
+                console.log(e);
+                res.send("Error: json data conversion failed for :\n" + chunks.join(''));
+            }
+        });
+    });
+}
+
+exports.adminElementsImportPage = function(req, res) {
+    let jsonEditorTpl = require('../templates/elementsimport.handlebars');
+    let template = handlebars.compile(jsonEditorTpl.tpl());
+    res.send(template({selectedDomain: req.params.domain}));
 }
 
 exports.adminJsonEditor = function(req, res) {

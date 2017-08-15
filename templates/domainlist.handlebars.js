@@ -24,7 +24,7 @@ let tpl = `
 </p>
 {{#if currentRemote}}
     <p>
-        <form method="POST" action=".">
+        <form method="POST" action="/mirrorjson">
             <input type="submit" name="remove_domain" value="Remove current domain '{{currentRemote}}'" />
         </form>
     </p>
