@@ -12,6 +12,8 @@ let tpl = `
     <form id="saveform" action="/mirrorjson/{{domain}}" method="POST">
         <input type="hidden" name="hash" value="{{hash}}" />
         <input id="jsondata" type="hidden" name="jsondata" value="{{{json}}}" />
+        <label>Set json as protected (will not be overwritten by external API data)</label>
+        <input type="checkbox" name="setprotected" checked="checked" />
         <input id="save" type="button" name="StoreJson" value="Save Json" />
         <input id="cancel" type="button" value="Cancel changes" />
     </form>

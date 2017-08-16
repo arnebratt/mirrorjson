@@ -59,7 +59,7 @@ exports.postData = function(req, res) {
                     if (results && results.statusCode === 200) {
                         try {
                             let json = JSON.parse(body);
-                            db.storeData(req.get('host'), path, body);
+                            db.storeData(req.get('host'), null, path, body);
                             return res.send(json);
                         } catch(e) {
                             console.log(e);

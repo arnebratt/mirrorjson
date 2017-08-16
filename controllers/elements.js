@@ -27,8 +27,9 @@ let addJson = function(req, res) {
 
     if (path || hash) {
         try {
+            let setProtected = (req.body.setprotected) ? true : false;
             JSON.parse(req.body.jsondata);
-            db.storeData(req.get('host'), hash, path, req.body.jsondata, function(err, numberAffected) {
+            db.storeData(req.get('host'), hash, path, req.body.jsondata, setProtected, function(err, numberAffected) {
                 listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
             })
         } catch(e) {
@@ -43,7 +44,7 @@ let exportJson = function(req, res) {
     db.getSiteElements(req.params.domain, res, function(err, results) {
         let docs = results.map(data => {
             try {
-                return {hash: data.hash, json: JSON.parse(data.json)}
+                return {hash: data.hash, path: data.path, json: JSON.parse(data.json), isProtected: data.isProtected}
             } catch(e) {
                 res.send("Error: json data conversion failed for :\n" + data.json);
             }
@@ -68,7 +69,7 @@ exports.adminElementsImport = function(req, res) {
             try {
                 let jsondata = JSON.parse(chunks.join(''));
                 jsondata.map(data => {
-                    db.updateData(req.params.domain, data.hash, JSON.stringify(data.json));
+                    db.storeData(req.params.domain, data.hash, data.path, JSON.stringify(data.json), data.isProtected);
                 });
 
                 let jsonEditorTpl = require('../templates/elementsimport.handlebars');
