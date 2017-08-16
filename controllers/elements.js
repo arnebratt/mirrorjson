@@ -5,11 +5,13 @@ let elementsListTpl = require('../templates/elementslist.handlebars');
 
 // List all elements registered in the database for the selected domain
 let listElements = function(req, res, status = "") {
+    const SHOW_PATH_LENGTH = 60;
     const SHOW_JSON_LENGTH = 600;
     db.getSiteElements(req.params.domain, res, function(err, results) {
         let list = results.map(json => {
             return {
                 hash: json.hash,
+                path: json.path ? json.path.substring(0, SHOW_PATH_LENGTH) + (json.path.length > SHOW_PATH_LENGTH ? "...+" + (json.path.length - SHOW_PATH_LENGTH) : "") : '',
                 json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
             };
         });

@@ -4,7 +4,7 @@ let tpl = `
 <ul>
     {{#results}}
         <li>
-            <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}">{{hash}}</a>
+            <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}"{{#if path}} title="{{path}}"{{/if}}>{{hash}}</a>
             =>
             {{json}}
         </li>
