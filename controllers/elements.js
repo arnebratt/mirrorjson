@@ -1,54 +1,34 @@
-let mongoose = require('mongoose'),
-    handlebars = require('handlebars')
-    md5 = require('md5');
-
-let Domain = mongoose.model('Domain');
-let Data = mongoose.model('Data');
+let db = require('../lib/database'),
+    handlebars = require('handlebars');
 
 let elementsListTpl = require('../templates/elementslist.handlebars');
 
 // List all elements registered in the database for the selected domain
 let listElements = function(req, res, status = "") {
     const SHOW_JSON_LENGTH = 600;
-    Domain.findOne({localDomain: req.params.domain}, "_id", function(err, currentSite) {
-        if (currentSite) {
-            Data.find({domainId: currentSite._id}, function(err, results) {
-                let list = results.map(json => {return {
-                    hash: json.hash,
-                    json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
-                };});
-                let template = handlebars.compile(elementsListTpl.tpl());
-                res.send(template({results: list, selectedDomain: req.params.domain, status: status}));
-            });
-        } else {
-            return res.send("Error: Local domain not registered, " + site)
-        }
+    db.getSiteElements(req.params.domain, res, function(err, results) {
+        let list = results.map(json => {
+            return {
+                hash: json.hash,
+                json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
+            };
+        });
+        let template = handlebars.compile(elementsListTpl.tpl());
+        res.send(template({results: list, selectedDomain: req.params.domain, status: status}));
     });
 }
 
 // Add json data for the current domain and specified hash
 let addJson = function(req, res) {
-    let dataCtrl = require("../controllers/data");
-    let ObjectId = require('mongoose').Types.ObjectId;
-    let hash = undefined;
+    let hash = (req.body.hash) ? req.body.hash : null;
+    let path = decodeURI(req.body.path);
 
-    if (req.body.path) {
-        hash = md5(decodeURI(req.body.path));
-    } else if (req.body.hash) {
-        hash = req.body.hash;
-    }
-    if (hash) {
+    if (path || hash) {
         try {
             JSON.parse(req.body.jsondata);
-            Domain.findOne({localDomain: req.get('host')}, "_id", function(err, currentSite) {
-                if (currentSite) {
-                    dataCtrl.storeData(req.get('host'), hash, req.body.jsondata, function(err, numberAffected) {
-                        listElements(req, res, "Json stored for hash " + hash);
-                    });
-                } else {
-                    return res.send("Error: Local domain not registered, " + req.get('host'))
-                }
-            });
+            db.storeData(req.get('host'), hash, path, req.body.jsondata, function(err, numberAffected) {
+                listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
+            })
         } catch(e) {
             res.send("Error: json data conversion failed for :\n" + req.body.jsondata);
         }
@@ -58,24 +38,18 @@ let addJson = function(req, res) {
 }
 
 let exportJson = function(req, res) {
-    Domain.findOne({localDomain: req.params.domain}, "_id", function(err, currentSite) {
-        if (currentSite) {
-            Data.find({domainId: currentSite._id}, "hash json", function(err, results) {
-                let docs = results.map(data => {
-                    try {
-                        return {hash: data.hash, json: JSON.parse(data.json)}
-                    } catch(e) {
-                        res.send("Error: json data conversion failed for :\n" + data.json);
-                    }
-                });
+    db.getSiteElements(req.params.domain, res, function(err, results) {
+        let docs = results.map(data => {
+            try {
+                return {hash: data.hash, json: JSON.parse(data.json)}
+            } catch(e) {
+                res.send("Error: json data conversion failed for :\n" + data.json);
+            }
+        });
 
-                res.setHeader('Content-disposition', 'attachment; filename=mirrorjson.json');
-                res.set("Content-Type", "application/json");
-                res.send(docs);
-            });
-        } else {
-            return res.send("Error: Local domain not registered, " + site)
-        }
+        res.setHeader('Content-disposition', 'attachment; filename=mirrorjson.json');
+        res.set("Content-Type", "application/json");
+        res.send(docs);
     });
 }
 
@@ -90,11 +64,9 @@ exports.adminElementsImport = function(req, res) {
 
         file.on("end", function () {
             try {
-                let dataCtrl = require("../controllers/data");
                 let jsondata = JSON.parse(chunks.join(''));
                 jsondata.map(data => {
-                    dataCtrl.storeData(req.params.domain, data.hash, JSON.stringify(data.json), function(err, numberAffected) {
-                    });
+                    db.updateData(req.params.domain, data.hash, JSON.stringify(data.json));
                 });
 
                 let jsonEditorTpl = require('../templates/elementsimport.handlebars');
@@ -115,18 +87,10 @@ exports.adminElementsImportPage = function(req, res) {
 }
 
 exports.adminJsonEditor = function(req, res) {
-    Domain.findOne({localDomain: req.params.domain}, "_id", function(err, currentSite) {
-        if (currentSite) {
-            Data.findOne({domainId: currentSite._id, hash: req.params.hash}, function(err, currentData) {
-                if (currentData) {
-                    let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
-                    let template = handlebars.compile(jsonEditorTpl.tpl());
-                    res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain}));
-                } else {
-                    return res.send("Error: Requested data not found, " + req.params.hash)
-                }
-            });
-        }
+    db.getElement(req.params.domain, req.params.hash, null, res, function(res, err, currentData) {
+        let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
+        let template = handlebars.compile(jsonEditorTpl.tpl());
+        res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain}));
     });
 }
 
