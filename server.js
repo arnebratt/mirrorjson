@@ -28,7 +28,7 @@ process.argv.forEach(function (val, index, array) {
 });
 
 // Connect to Mongo DB database
-var mongoUri = 'mongodb://localhost/test';
+var mongoUri = 'mongodb://localhost/mirrorjson';
 var promise = mongoose.connect(mongoUri, {useMongoClient: true});
 
 promise.then(function (db) {
