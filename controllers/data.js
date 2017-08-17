@@ -40,7 +40,7 @@ let getExternalData = function(url, body, callback) {
 let sendResultJson = function(res, err, results) {
     if (results) {
         try {
-            return res.send(JSON.parse(results.json));
+            return res.json(JSON.parse(results.json));
         } catch(e) {
             console.log(e);
             res.send("Error: json data conversion failed for :\n" + results.json);
@@ -66,7 +66,7 @@ exports.postData = function(req, res) {
                             try {
                                 let json = JSON.parse(body);
                                 db.storeData(req.get('host'), null, path, body);
-                                return res.send(json);
+                                return res.json(json);
                             } catch(e) {
                                 console.log(e);
                                 res.send("Error: json data conversion failed for :\n" + body);

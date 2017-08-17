@@ -41,6 +41,7 @@ promise.then(function (db) {
         app.use(bodyParser.json()); // support json encoded bodies
         app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+        app.use('/mirrorjson/LICENSE.md', express.static('LICENSE.md'));
         app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
 
         // Connect routes with controllers
