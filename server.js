@@ -29,35 +29,34 @@ process.argv.forEach(function (val, index, array) {
 
 // Connect to Mongo DB database
 var mongoUri = 'mongodb://localhost/mirrorjson';
-var promise = mongoose.connect(mongoUri, {useMongoClient: true});
+mongoose.connect(mongoUri, {useMongoClient: true});
 
-promise.then(function (db) {
-    db.on('error', function () {
-        throw new Error('Unable to connect to database at ' + mongoUri);
-    });
-
-    try {
-        app.use(busboy());
-        app.use(bodyParser.json()); // support json encoded bodies
-        app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-
-        app.use('/mirrorjson/LICENSE.md', express.static('LICENSE.md'));
-        app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
-
-        // Connect routes with controllers
-        app.post(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
-        app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImportPage);
-        app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
-        app.post(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
-        app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
-        app.post(["/mirrorjson"], domainCtrl.adminDomainList);
-        app.get(["/mirrorjson"], domainCtrl.adminDomainList);
-        app.get(["/*"], dataCtrl.postData);
-        app.post(["/*"], dataCtrl.postData);
-    } catch(err) {
-        console.log(err);
-    }
+mongoose.connection.on('error', function () {
+    console.log(err);
+    throw new Error('Unable to connect to database at ' + mongoUri);
 });
+
+try {
+    app.use(busboy());
+    app.use(bodyParser.json()); // support json encoded bodies
+    app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+    app.use('/mirrorjson/LICENSE.md', express.static('LICENSE.md'));
+    app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
+
+    // Connect routes with controllers
+    app.post(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
+    app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImportPage);
+    app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
+    app.post(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
+    app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
+    app.post(["/mirrorjson"], domainCtrl.adminDomainList);
+    app.get(["/mirrorjson"], domainCtrl.adminDomainList);
+    app.get(["/*"], dataCtrl.postData);
+    app.post(["/*"], dataCtrl.postData);
+} catch(err) {
+    console.log(err);
+}
 
 // Start server on selected port
 app.listen(port);
