@@ -27,6 +27,9 @@ let tpl = `
     <label>Json:</label>
      <textarea name="jsondata" rows="10" cols="80"></textarea>
      <br />
+    <input type="checkbox" name="setprotected" />
+    <label>Set this json as protected (will not be overwritten by external API data)</label>
+     <br />
     <input type="submit" value="Save element" />
 </form>
 `;
