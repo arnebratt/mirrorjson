@@ -1,7 +1,7 @@
 {
   "name": "mirrorjson",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.0.1",
+  "main": "server.js",
   "author": "Arne Bakkebø",
   "license": "MIT",
   "dependencies": {

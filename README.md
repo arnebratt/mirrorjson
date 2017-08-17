@@ -49,4 +49,7 @@ Todo
 
 * Remove elements functionality
 * Remove elements when remote domain is removed
+* Handle PUT
+* Handle cookies
 * Fix Mongoose promise deprecation warning
+* Add support for XML?
