@@ -47,9 +47,6 @@ system. By clicking on each stored element hash you come to the built in json ed
 Todo
 ====
 
-* Add path information to json model
-* Add read only field to json model, to avoid update from server on edited json
 * Remove elements functionality
-* Add API prefix field to domain model
 * Remove elements when remote domain is removed
 * Fix Mongoose promise deprecation warning

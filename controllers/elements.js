@@ -40,6 +40,7 @@ let addJson = function(req, res) {
     }
 }
 
+// Export all elements for this domain
 let exportJson = function(req, res) {
     db.getSiteElements(req.params.domain, res, function(err, results) {
         let docs = results.map(data => {
@@ -56,6 +57,7 @@ let exportJson = function(req, res) {
     });
 }
 
+// Import elements from a json file to this domain
 exports.adminElementsImport = function(req, res) {
     req.pipe(req.busboy);
     req.busboy.on('file', function (fieldname, file, filename) {
@@ -91,9 +93,13 @@ exports.adminElementsImportPage = function(req, res) {
 
 exports.adminJsonEditor = function(req, res) {
     db.getElement(req.params.domain, req.params.hash, null, res, function(res, err, currentData) {
-        let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
-        let template = handlebars.compile(jsonEditorTpl.tpl());
-        res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain}));
+        if (currentData) {
+            let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
+            let template = handlebars.compile(jsonEditorTpl.tpl());
+            res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain, isProtected: currentData.isProtected}));
+        } else {
+            return res.send("Error: Requested data not found");
+        }
     });
 }
 

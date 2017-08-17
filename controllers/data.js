@@ -38,11 +38,15 @@ let getExternalData = function(url, body, callback) {
 }
 
 let sendResultJson = function(res, err, results) {
-    try {
-        return res.send(JSON.parse(results.json));
-    } catch(e) {
-        console.log(e);
-        res.send("Error: json data conversion failed for :\n" + results.json);
+    if (results) {
+        try {
+            return res.send(JSON.parse(results.json));
+        } catch(e) {
+            console.log(e);
+            res.send("Error: json data conversion failed for :\n" + results.json);
+        }
+    } else {
+        return res.send("Error: Requested data not found");
     }
 }
 
@@ -53,25 +57,28 @@ exports.postData = function(req, res) {
 
     getPostBody(req, function() {
         let path = req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
-        if (enableExternal) {
-            db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
-                getExternalData(url, req.jsonBody, function(err, results, body) {
-                    if (results && results.statusCode === 200) {
-                        try {
-                            let json = JSON.parse(body);
-                            db.storeData(req.get('host'), null, path, body);
-                            return res.send(json);
-                        } catch(e) {
-                            console.log(e);
-                            res.send("Error: json data conversion failed for :\n" + body);
+        db.getElement(req.get('host'), null, path, res, function(res, err, results) {
+            let isProtected = (results && results.isProtected);
+            if (enableExternal && !isProtected) {
+                db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
+                    getExternalData(url, req.jsonBody, function(externalErr, externalResults, body) {
+                        if (externalResults && externalResults.statusCode === 200) {
+                            try {
+                                let json = JSON.parse(body);
+                                db.storeData(req.get('host'), null, path, body);
+                                return res.send(json);
+                            } catch(e) {
+                                console.log(e);
+                                res.send("Error: json data conversion failed for :\n" + body);
+                            }
+                        } else {
+                            sendResultJson(res, err, results);
                         }
-                    } else {
-                        db.getElement(req.get('host'), null, path, res, sendResultJson);
-                    }
+                    });
                 });
-            });
-        } else {
-            db.getElement(req.get('host'), null, path, res, sendResultJson);
-        }
+            } else {
+                sendResultJson(res, err, results);
+            }
+        });
     });
 }
