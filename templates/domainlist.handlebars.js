@@ -5,7 +5,7 @@ let tpl = `
             <li>
                 <a href="http://{{localDomain}}/mirrorjson">{{localDomain}}</a>
                 <=
-                <a href="http://{{remoteDomain}}">{{remoteDomain}}</a>
+                <a href="http://{{remoteDomain}}" target="_blank">{{remoteDomain}}</a>
                 (<a href="/mirrorjson/{{localDomain}}">view {{#if (lookup ../countDocs this._id)}}{{lookup ../countDocs this._id}}{{else}}0{{/if}} stored elements</a>)
             </li>
         {{/results}}

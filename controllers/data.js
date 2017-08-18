@@ -1,6 +1,8 @@
 let db = require('../lib/database'),
     request = require('request');
-let enableExternal = true;
+let enableExternal = true
+    forwardHeaders = ['Accept', 'Accept-Encoding', 'Accept-Language', 'Cache-Control', 'Connection', 'Host', 'Set-Cookie', 'Cookie'],
+    returnHeaders = ['server', 'served-by', 'expires', 'cache-control', 'pragma', 'x-powered-by', 'content-language', 'content-type', 'set-cookie', 'last-modified', 'transfer-encoding', 'date'];
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
 exports.enableExternal = function(useExternal) {
@@ -25,7 +27,7 @@ let getPostBody = function(req, callback) {
 }
 
 // Fetch json data from external API
-let getExternalData = function(url, body, callback) {
+let getExternalData = function(url, headers, body, callback) {
     let options = {
         uri : url,
         method : (body !== "") ? 'POST' : 'GET'
@@ -34,6 +36,11 @@ let getExternalData = function(url, body, callback) {
         options.headers = {'content-type' : 'application/x-www-form-urlencoded'};
         options.body = body
     }
+    forwardHeaders.forEach(value => {
+        if (headers[value]) {
+            options.headers[value] = headers[value];
+        }
+    });
     request(options, callback);
 }
 
@@ -61,7 +68,7 @@ exports.postData = function(req, res) {
             let isProtected = (results && results.isProtected);
             if (enableExternal && !isProtected) {
                 db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
-                    getExternalData(url, req.jsonBody, function(externalErr, externalResults, body) {
+                    getExternalData(url, req.headers, req.jsonBody, function(externalErr, externalResults, body) {
                         if (externalResults && externalResults.statusCode === 200) {
                             try {
                                 let json = JSON.parse(body);
