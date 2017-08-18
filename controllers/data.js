@@ -1,7 +1,7 @@
 let db = require('../lib/database'),
     request = require('request');
 let enableExternal = true
-    forwardHeaders = ['Accept', 'Accept-Encoding', 'Accept-Language', 'Cache-Control', 'Connection', 'Host', 'Set-Cookie', 'Cookie'],
+    forwardHeaders = ['accept', 'accept-encoding', 'accept-language', 'cache-control', 'connection', 'host', 'set-cookie', 'cookie', 'content-type'],
     returnHeaders = ['server', 'served-by', 'expires', 'cache-control', 'pragma', 'x-powered-by', 'content-language', 'content-type', 'set-cookie', 'last-modified', 'transfer-encoding', 'date'];
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
@@ -30,17 +30,18 @@ let getPostBody = function(req, callback) {
 let getExternalData = function(url, headers, body, callback) {
     let options = {
         uri : url,
-        method : (body !== "") ? 'POST' : 'GET'
-    }
-    if (body !== "") {
-        options.headers = {'content-type' : 'application/x-www-form-urlencoded'};
-        options.body = body
+        method : (body !== "") ? 'POST' : 'GET',
+        headers: {}
     }
     forwardHeaders.forEach(value => {
         if (headers[value]) {
             options.headers[value] = headers[value];
         }
     });
+    if (body !== "") {
+        options.body = body
+    }
+
     request(options, callback);
 }
 
