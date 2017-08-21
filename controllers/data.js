@@ -73,7 +73,7 @@ exports.postData = function(req, res) {
                         if (externalResults && externalResults.statusCode === 200) {
                             try {
                                 let json = JSON.parse(body);
-                                db.storeData(req.get('host'), null, path, body);
+                                db.storeData(req.get('host'), null, path, externalResults.headers, body);
                                 return res.json(json);
                             } catch(e) {
                                 console.log(e);
