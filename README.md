@@ -56,6 +56,8 @@ link on "(view 1 stored documents)", it will show you a list of stored documents
 Here you can manually add json data for any specific path, or click on the hash to edit the json returned from
 the external API.
 
+If the external API requires https, you can set up the relation as "https://raw.githubusercontent.com".
+
 Multiple API's
 --------------
 
@@ -88,5 +90,4 @@ Todo
 * Remove document functionality
 * Remove all related documents when remote domain is updated/removed
 * Handle PUT
-* Handle HTTPS
 * Add support for XML?
