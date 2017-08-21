@@ -48,6 +48,10 @@ let getExternalData = function(url, headers, body, callback) {
 
 let sendResultJson = function(res, err, headers, json) {
     if (json) {
+        if (!headers) {
+            // Reset headers if it is undefined from database
+            headers = "{}";
+        }
         try {
             headers = JSON.parse(headers);
             json = JSON.parse(json);
