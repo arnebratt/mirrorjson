@@ -89,5 +89,4 @@ Todo
 
 * Remove document functionality
 * Remove all related documents when remote domain is updated/removed
-* Handle PUT
 * Add support for XML?
