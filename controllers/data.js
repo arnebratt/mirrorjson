@@ -1,7 +1,7 @@
 let db = require('../lib/database'),
     request = require('request');
 let enableExternal = true
-    forwardHeaders = ['accept', 'accept-encoding', 'accept-language', 'cache-control', 'connection', 'host', 'set-cookie', 'cookie', 'content-type'],
+    forwardHeaders = ['set-cookie', 'cookie'],
     returnHeaders = ['server', 'served-by', 'expires', 'cache-control', 'pragma', 'x-powered-by', 'content-language', 'content-type', 'set-cookie', 'last-modified', 'transfer-encoding', 'date'];
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
@@ -34,6 +34,7 @@ let getExternalData = function(url, headers, body, callback) {
         headers: {}
     }
     forwardHeaders.forEach(value => {
+        value = value.toLowerCase();
         if (headers[value]) {
             options.headers[value] = headers[value];
         }
@@ -45,13 +46,21 @@ let getExternalData = function(url, headers, body, callback) {
     request(options, callback);
 }
 
-let sendResultJson = function(res, err, results) {
-    if (results) {
+let sendResultJson = function(res, err, headers, json) {
+    if (json) {
         try {
-            return res.json(JSON.parse(results.json));
+            headers = JSON.parse(headers);
+            json = JSON.parse(json);
+            returnHeaders.forEach(value => {
+                value = value.toLowerCase();
+                if (headers[value]) {
+                    res.header(value, headers[value]);
+                }
+            });
+            return res.json(json);
         } catch(e) {
             console.log(e);
-            res.send("Error: json data conversion failed for :\n" + results.json);
+            res.send("Error: json data conversion failed for :\n" + json);
         }
     } else {
         return res.send("Error: Requested data not found");
@@ -61,7 +70,7 @@ let sendResultJson = function(res, err, results) {
 // Get json from external API, or the mirrored data in local MongoDB database
 exports.postData = function(req, res) {
     // Give access to any site for these data
-    res.set("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", "*");
 
     getPostBody(req, function() {
         let path = req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
@@ -71,21 +80,16 @@ exports.postData = function(req, res) {
                 db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
                     getExternalData(url, req.headers, req.jsonBody, function(externalErr, externalResults, body) {
                         if (externalResults && externalResults.statusCode === 200) {
-                            try {
-                                let json = JSON.parse(body);
-                                db.storeData(req.get('host'), null, path, externalResults.headers, body);
-                                return res.json(json);
-                            } catch(e) {
-                                console.log(e);
-                                res.send("Error: json data conversion failed for :\n" + body);
-                            }
+                            let headers = (externalResults) ? JSON.stringify(externalResults.headers) : "";
+                            db.storeData(req.get('host'), null, path, headers, body);
+                            sendResultJson(res, err, headers, body);
                         } else {
-                            sendResultJson(res, err, results);
+                            sendResultJson(res, err, (results) ? results.headers : "", (results) ? results.json : "");
                         }
                     });
                 });
             } else {
-                sendResultJson(res, err, results);
+                sendResultJson(res, err, (results) ? results.headers : "", (results) ? results.json : "");
             }
         });
     });
