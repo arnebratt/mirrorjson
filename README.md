@@ -87,6 +87,5 @@ For complex projects you can combine multiple hosts and ports, matching each com
 Todo
 ====
 
-* Edit header values
 * Edit which headers are sent and returned
 * Add support for XML?
