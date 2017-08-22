@@ -1,0 +1,42 @@
+{{> header isEditor=true }}
+
+<form id="saveform" action="/mirrorjson/{{domain}}" method="POST">
+    <input type="hidden" name="hash" value="{{hash}}" />
+    <input id="headers" type="hidden" name="headers" value="" />
+    <input id="jsondata" type="hidden" name="jsondata" value="" />
+    <input type="checkbox" name="setprotected" {{#if isProtected}}checked="checked"{{/if}} />
+    <label>Set this json as protected (will not be overwritten by external API data)</label>
+    <br />
+    <input id="save" type="button" name="StoreJson" value="Save Json" />
+    <input id="cancel" type="button" value="Cancel changes" />
+</form>
+
+<div id="jsoneditor" style="width: 600px; height: 800px;"></div>
+<p>Headers (the effect of modifications here will depend on which headers are actually sent to frontend):</p>
+<div id="headerseditor" style="width: 600px; height: 400px;"></div>
+
+<p><a href="https://github.com/josdejong/jsoneditor/blob/master/docs/shortcut_keys.md" target="_blank">Shortcut keys</a></p>
+
+<script>
+    // create the editor
+    var options = {mode: "form", modes: ["code", "form"], onError: function (err) {alert(err.toString());}};
+    var editor = new JSONEditor(document.getElementById("jsoneditor"), options);
+    var headersEditor = new JSONEditor(document.getElementById("headerseditor"), options);
+
+    // set json
+    editor.set({{{json}}});
+    headersEditor.set({{{headers}}});
+
+    function save() {
+        document.getElementById('headers').value=JSON.stringify(headersEditor.get());
+        document.getElementById('jsondata').value=JSON.stringify(editor.get());
+        document.getElementById('saveform').submit();
+    }
+    function cancel() {
+        window.location.href = "/mirrorjson/{{domain}}";
+    }
+    document.getElementById("save").addEventListener("click", save);
+    document.getElementById("cancel").addEventListener("click", cancel);
+</script>
+
+{{> footer }}

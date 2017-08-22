@@ -1,4 +1,5 @@
-let tpl = `
+{{> header status=status }}
+
 <h2>{{selectedDomain}}</h2>
 
 <ul>
@@ -32,8 +33,5 @@ let tpl = `
      <br />
     <input type="submit" value="Save element" />
 </form>
-`;
 
-let headerTpl = require('../templates/header.handlebars');
-let footerTpl = require('../templates/footer.handlebars');
-exports.tpl = () => headerTpl.tpl() + tpl + footerTpl.tpl();
+{{> footer }}

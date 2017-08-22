@@ -1,8 +1,6 @@
 let db = require('../lib/database'),
     handlebars = require('handlebars');
 
-let elementsListTpl = require('../templates/elementslist.handlebars');
-
 // List all elements registered in the database for the selected domain
 let listElements = function(req, res, status = "") {
     const SHOW_PATH_LENGTH = 60;
@@ -13,8 +11,7 @@ let listElements = function(req, res, status = "") {
             path: json.path ? json.path.substring(0, SHOW_PATH_LENGTH) + (json.path.length > SHOW_PATH_LENGTH ? "...+" + (json.path.length - SHOW_PATH_LENGTH) : "") : '',
             json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
         }));
-        let template = handlebars.compile(elementsListTpl.tpl());
-        res.send(template({results: list, selectedDomain: req.params.domain, status: status}));
+        res.render('elementslist', {results: list, selectedDomain: req.params.domain, status: status});
     });
 }
 
@@ -69,13 +66,10 @@ exports.adminElementsImport = function(req, res) {
         file.on("end", function () {
             try {
                 let jsondata = JSON.parse(chunks.join(''));
-                jsondata.map(data => {
+                jsondata.forEach(data => {
                     db.storeData(req.params.domain, data.hash, data.path, data.headers, JSON.stringify(data.json), data.isProtected);
                 });
-
-                let jsonEditorTpl = require('../templates/elementsimport.handlebars');
-                let template = handlebars.compile(jsonEditorTpl.tpl());
-                res.send(template({selectedDomain: req.params.domain, status: "Updated data from file " + filename}));
+                res.render('elementsimport', {selectedDomain: req.params.domain, status: "Updated data from file " + filename});
             } catch(err) {
                 console.log(err);
                 res.send("Error: json data conversion failed for :\n" + chunks.join(''));
@@ -85,17 +79,19 @@ exports.adminElementsImport = function(req, res) {
 }
 
 exports.adminElementsImportPage = function(req, res) {
-    let jsonEditorTpl = require('../templates/elementsimport.handlebars');
-    let template = handlebars.compile(jsonEditorTpl.tpl());
-    res.send(template({selectedDomain: req.params.domain}));
+    res.render('elementsimport', {selectedDomain: req.params.domain});
 }
 
 exports.adminJsonEditor = function(req, res) {
     db.getElement(req.params.domain, req.params.hash, null, res, function(res, err, currentData) {
         if (currentData) {
-            let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
-            let template = handlebars.compile(jsonEditorTpl.tpl());
-            res.send(template({headers: currentData.headers, json: currentData.json, hash: currentData.hash, domain: req.params.domain, isProtected: currentData.isProtected}));
+            res.render('jsoneditor', {
+                headers: currentData.headers || '{}',
+                json: currentData.json,
+                hash: currentData.hash,
+                domain: req.params.domain,
+                isProtected: currentData.isProtected
+            });
         } else {
             return res.send("Error: Requested data not found");
         }

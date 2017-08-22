@@ -1,21 +1,18 @@
 let db = require('../lib/database'),
     handlebars = require('handlebars');
 
-let domainListTpl = require('../templates/domainlist.handlebars');
-
 // List all domains registered in the database with elements count
 let listDomains = function(req, res, status = "") {
     db.getDomains(res, function(results) {
         let currentDomain = results.find(domain => domain.localDomain === req.get('host'));
         db.getDomainElementsCount(function(countDocs) {
-            let template = handlebars.compile(domainListTpl.tpl());
-            res.send(template({
+            res.render('domainlist', {
                 results: results,
                 countDocs: countDocs,
                 currentLocal: req.get('host'),
                 currentRemote: (currentDomain ? currentDomain.remoteDomain : undefined),
                 status: status
-            }));
+            });
         });
     });
 }

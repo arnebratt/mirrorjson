@@ -3,6 +3,8 @@ var express = require('express'),
     mongoose = require('mongoose'),
     bodyParser = require('body-parser'),
     busboy = require('connect-busboy'),
+    hbs = require('hbs'),
+    packageJson = require('./package.json'),
     port = 3001;
 
 require("./models/json");
@@ -37,9 +39,15 @@ mongoose.connection.on('error', function () {
 });
 
 try {
-    app.use(busboy());
+    app.use(busboy()); // for handling HTTP file upload
     app.use(bodyParser.json()); // support json encoded bodies
     app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+    // Configuring Handlebars template engine
+    app.set('view engine', 'hbs');
+    app.set('views', './templates');
+    hbs.registerPartials('./templates/partials');
+    hbs.localsAsTemplateData(app);
+    app.locals.version = packageJson.version;
 
     app.use('/mirrorjson/LICENSE.md', express.static('LICENSE.md'));
     app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));

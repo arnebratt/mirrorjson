@@ -1,4 +1,5 @@
-let tpl = `
+{{> header status=status }}
+
 {{#if results}}
     <ul>
         {{#results}}
@@ -30,8 +31,5 @@ let tpl = `
         </form>
     </p>
 {{/if}}
-`;
 
-let headerTpl = require('../templates/header.handlebars');
-let footerTpl = require('../templates/footer.handlebars');
-exports.tpl = () => headerTpl.tpl() + tpl + footerTpl.tpl();
+{{> footer }}

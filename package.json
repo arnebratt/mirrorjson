@@ -9,6 +9,7 @@
     "connect-busboy": "^0.0.2",
     "express": "^4.15.3",
     "handlebars": "^4.0.10",
+    "hbs": "^4.0.1",
     "jsoneditor": "^5.9.3",
     "md5": "^2.2.1",
     "mongoose": "^4.11.3",
