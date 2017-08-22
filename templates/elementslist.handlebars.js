@@ -25,7 +25,7 @@ let tpl = `
     <input type="text" name="path" value="/" />
     <br />
     <label>Json:</label>
-     <textarea name="jsondata" rows="10" cols="80"></textarea>
+     <textarea name="jsondata" rows="10" cols="100"></textarea>
      <br />
     <input type="checkbox" name="setprotected" />
     <label>Set this json as protected (will not be overwritten by external API data)</label>

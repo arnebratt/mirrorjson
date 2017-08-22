@@ -26,12 +26,13 @@ let addJson = function(req, res) {
     if (path || hash) {
         try {
             let setProtected = (req.body.setprotected) ? true : false;
+            JSON.parse(req.body.headers);
             JSON.parse(req.body.jsondata);
-            db.storeData(req.get('host'), hash, path, req.body.jsondata, setProtected, function(err, numberAffected) {
+            db.storeData(req.params.domain, hash, path, req.body.headers, req.body.jsondata, setProtected, function(err, numberAffected) {
                 listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
             })
         } catch(e) {
-            res.send("Error: json data conversion failed for :\n" + req.body.jsondata);
+            res.send("Error: json data conversion failed for :\n" + req.body.jsondata + "\n\n" + req.body.headers);
         }
     } else {
         res.send("Error: Missing path information");
@@ -94,7 +95,7 @@ exports.adminJsonEditor = function(req, res) {
         if (currentData) {
             let jsonEditorTpl = require('../templates/jsoneditor.handlebars');
             let template = handlebars.compile(jsonEditorTpl.tpl());
-            res.send(template({json: currentData.json, hash: currentData.hash, domain: req.params.domain, isProtected: currentData.isProtected}));
+            res.send(template({headers: currentData.headers, json: currentData.json, hash: currentData.hash, domain: req.params.domain, isProtected: currentData.isProtected}));
         } else {
             return res.send("Error: Requested data not found");
         }
