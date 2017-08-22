@@ -20,7 +20,7 @@ let tpl = `
 
 <h2>Add a json string manually for specified path on '{{selectedDomain}}'</h2>
 <form method="POST" action="/mirrorjson/{{selectedDomain}}">
-    <p>Existing data for the given path will be overwritten.</p>
+    <p>Be aware: Existing data for the given path will be overwritten.</p>
     <label>Path:</label>
     <input type="text" name="path" value="/" />
     <br />

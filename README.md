@@ -11,7 +11,7 @@ get the resulting json data and store it in a database, then return the same dat
 
 If the external server can not be reached, MirrorJson will return the last received data from the local database,
 allowing a developer to work with the data offline. It also allows you to edit that json before it is sent to
-your frontend client.
+your frontend client, or add mock json data to specified API paths.
 
 Setup
 =====
@@ -56,7 +56,7 @@ link on "(view 1 stored documents)", it will show you a list of stored documents
 Here you can manually add json data for any specific path, or click on the hash to edit the json returned from
 the external API.
 
-If the external API requires https, you can set up the relation as "https://raw.githubusercontent.com".
+If the external API requires https, you can set up the relation as "https&#58;//raw.githubusercontent.com".
 
 Multiple API's
 --------------
