@@ -87,6 +87,6 @@ For complex projects you can combine multiple hosts and ports, matching each com
 Todo
 ====
 
-* Remove document functionality
-* Remove all related documents when remote domain is updated/removed
+* Edit header values
+* Edit which headers are sent and returned
 * Add support for XML?

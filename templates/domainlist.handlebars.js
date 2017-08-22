@@ -15,6 +15,7 @@ let tpl = `
 {{/if}}
 
 <h2>Set external API domain for '{{currentLocal}}'</h2>
+<p>Be aware: Any existing documents related to '{{currentLocal}}' will be deleted when its external domain is changed.</p>
 <p>
     <form method="POST" action="/mirrorjson">
         <label>Domain:</label>

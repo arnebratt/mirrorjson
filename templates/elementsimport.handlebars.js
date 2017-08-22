@@ -7,7 +7,7 @@ let tpl = `
     <input type="submit" value="Import from json file" />
 </form>
 
-<p>Warning: any matching path hashes from the import will overwrite data currently in the database.</p>
+<p>Be aware: any matching path hashes from the import will overwrite data currently in the database.</p>
 `;
 
 let headerTpl = require('../templates/header.handlebars');

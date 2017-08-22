@@ -43,7 +43,7 @@ let exportJson = function(req, res) {
     db.getSiteElements(req.params.domain, res, function(err, results) {
         let docs = results.map(data => {
             try {
-                return {hash: data.hash, path: data.path, json: JSON.parse(data.json), isProtected: data.isProtected}
+                return {hash: data.hash, path: data.path, header: data.header, json: JSON.parse(data.json), isProtected: data.isProtected}
             } catch(e) {
                 res.send("Error: json data conversion failed for :\n" + data.json);
             }
@@ -69,7 +69,7 @@ exports.adminElementsImport = function(req, res) {
             try {
                 let jsondata = JSON.parse(chunks.join(''));
                 jsondata.map(data => {
-                    db.storeData(req.params.domain, data.hash, data.path, JSON.stringify(data.json), data.isProtected);
+                    db.storeData(req.params.domain, data.hash, data.path, data.headers, JSON.stringify(data.json), data.isProtected);
                 });
 
                 let jsonEditorTpl = require('../templates/elementsimport.handlebars');
