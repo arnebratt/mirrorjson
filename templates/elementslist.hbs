@@ -18,6 +18,12 @@
 <form method="GET" action="/mirrorjson/{{selectedDomain}}/import">
     <input type="submit" value="Import documents from json file" />
 </form>
+<form method="GET" action="/mirrorjson/{{selectedDomain}}/forwardheaders">
+    <input type="submit" value="Select headers to forward to external API" />
+</form>
+<form method="GET" action="/mirrorjson/{{selectedDomain}}/returnheaders">
+    <input type="submit" value="Select headers to return to frontend" />
+</form>
 
 <h2>Add a json string manually for specified path on '{{selectedDomain}}'</h2>
 <form method="POST" action="/mirrorjson/{{selectedDomain}}">

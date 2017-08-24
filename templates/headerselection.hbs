@@ -1,0 +1,16 @@
+{{> header status=status }}
+
+<form method="POST" action="/mirrorjson/{{selectedDomain}}">
+    <label>Select headers to forward:</label>
+    <div>
+        {{#each headers}}
+            <input type="checkbox" name="{{@key}}"{{#if this}} checked="checked"{{/if}} />{{@key}}<br />
+        {{/each}}
+    </div>
+    <input type="submit" value="Save selections" />
+</form>
+<form method="GET" action="/mirrorjson/{{selectedDomain}}">
+    <input type="submit" value="Cancel" />
+</form>
+
+{{> footer }}

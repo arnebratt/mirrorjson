@@ -56,6 +56,10 @@ try {
     app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
 
     // Administration interface routes
+    app.post(["/mirrorjson/:domain/forwardheaders"], elementsCtrl.adminForwardHeaders);
+    app.get(["/mirrorjson/:domain/forwardheaders"], elementsCtrl.adminForwardHeadersPage);
+    app.post(["/mirrorjson/:domain/returnheaders"], elementsCtrl.adminReturnHeaders);
+    app.get(["/mirrorjson/:domain/returnheaders"], elementsCtrl.adminReturnHeadersPage);
     app.post(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
     app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImportPage);
     app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);

@@ -82,6 +82,22 @@ exports.adminElementsImportPage = function(req, res) {
     res.render('elementsimport', {selectedDomain: req.params.domain});
 }
 
+exports.adminForwardHeaders = function(req, res) {
+    res.render('headerselection', {selectedDomain: req.params.domain, headers: {setcookie: true, cookie: false}});
+}
+
+exports.adminForwardHeadersPage = function(req, res) {
+    res.render('headerselection', {selectedDomain: req.params.domain, headers: {setcookie: true, cookie: false}});
+}
+
+exports.adminReturnHeaders = function(req, res) {
+    res.render('headerselection', {selectedDomain: req.params.domain, headers: {}});
+}
+
+exports.adminReturnHeadersPage = function(req, res) {
+    res.render('headerselection', {selectedDomain: req.params.domain, headers: {}});
+}
+
 exports.adminJsonEditor = function(req, res) {
     db.getElement(req.params.domain, req.params.hash, null, res, function(res, err, currentData) {
         if (currentData) {
