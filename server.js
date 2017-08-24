@@ -60,9 +60,7 @@ try {
     app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
     app.post(["/mirrorjson"], domainCtrl.adminDomainList);
     app.get(["/mirrorjson"], domainCtrl.adminDomainList);
-    app.get(["/*"], dataCtrl.postData);
-    app.put(["/*"], dataCtrl.postData);
-    app.post(["/*"], dataCtrl.postData);
+    app.all(["/*"], dataCtrl.postData);
 } catch(err) {
     console.log(err);
 }
