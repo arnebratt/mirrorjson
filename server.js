@@ -39,9 +39,11 @@ mongoose.connection.on('error', function () {
 });
 
 try {
-    app.use(busboy()); // for handling HTTP file upload
-    app.use(bodyParser.json()); // support json encoded bodies
-    app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+    // For handling HTTP file upload
+    app.use(busboy());
+    // Support HTTP POST json encoded bodies and encoded bodies
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
     // Configuring Handlebars template engine
     app.set('view engine', 'hbs');
     app.set('views', './templates');
@@ -49,10 +51,11 @@ try {
     hbs.localsAsTemplateData(app);
     app.locals.version = packageJson.version;
 
+    // Static file routes
     app.use('/mirrorjson/LICENSE.md', express.static('LICENSE.md'));
     app.use("/jsoneditor/dist", express.static('node_modules/jsoneditor/dist/'));
 
-    // Connect routes with controllers
+    // Administration interface routes
     app.post(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImport);
     app.get(["/mirrorjson/:domain/import"], elementsCtrl.adminElementsImportPage);
     app.get(["/mirrorjson/:domain/:hash"], elementsCtrl.adminJsonEditor);
@@ -60,6 +63,8 @@ try {
     app.get(["/mirrorjson/:domain"], elementsCtrl.adminElementsList);
     app.post(["/mirrorjson"], domainCtrl.adminDomainList);
     app.get(["/mirrorjson"], domainCtrl.adminDomainList);
+
+    // Any urls to pass on to external API
     app.all(["/*"], dataCtrl.postData);
 } catch(err) {
     console.log(err);
