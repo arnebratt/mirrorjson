@@ -29,7 +29,7 @@ Basic usage
 
 After starting your server, open [http://localhost:3001/mirrorjson](http://localhost:3001/mirrorjson). This will show
 you the MirrorJson administration interface. Your current address is localhost:3001, which must be matched with
-your external API. To do this, add the API domain to the "Domain" field, for instance api.randomdomain.com , and 
+your external API. To do this, add the API domain to the "Domain" field, for instance api.randomdomain.com , and
 click "Save domain". You will now see the relation in the domain list, something like this:
 
     localhost:3001 <= api.randomdomain.com (view 0 stored documents)
@@ -87,5 +87,4 @@ For complex projects you can combine multiple hosts and ports, matching each com
 Todo
 ====
 
-* Edit which headers are sent and returned
 * Add support for XML?

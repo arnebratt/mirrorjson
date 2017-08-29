@@ -1,7 +1,7 @@
 {{> header status=status }}
 
-<form method="POST" action="/mirrorjson/{{selectedDomain}}">
-    <label>Select headers to forward:</label>
+<form method="POST" action="/mirrorjson/{{selectedDomain}}/{{#if isForwardHeaders }}forwardheaders{{ else }}returnheaders{{/if}}">
+    <label>Select headers to {{#if isForwardHeaders }}forward to external API{{ else }}return to frontend{{/if}}:</label>
     <div>
         {{#each headers}}
             <input type="checkbox" name="{{@key}}"{{#if this}} checked="checked"{{/if}} />{{@key}}<br />

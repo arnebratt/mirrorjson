@@ -83,19 +83,31 @@ exports.adminElementsImportPage = function(req, res) {
 }
 
 exports.adminForwardHeaders = function(req, res) {
-    res.render('headerselection', {selectedDomain: req.params.domain, headers: {setcookie: true, cookie: false}});
+    db.getHeadersList(req.params.domain, true, res, function(res, err, headers) {
+        Object.keys(headers).forEach(header => headers[header] = (req.body[header] ? true : false));
+        db.updateHeadersList(req.params.domain, true, headers);
+        res.render('headerselection', {selectedDomain: req.params.domain, headers: headers, isForwardHeaders: true, status: "Updated headers selection"});
+    });
 }
 
 exports.adminForwardHeadersPage = function(req, res) {
-    res.render('headerselection', {selectedDomain: req.params.domain, headers: {setcookie: true, cookie: false}});
+    db.getHeadersList(req.params.domain, true, res, function(res, err, headers) {
+        res.render('headerselection', {selectedDomain: req.params.domain, headers: headers, isForwardHeaders: true});
+    });
 }
 
 exports.adminReturnHeaders = function(req, res) {
-    res.render('headerselection', {selectedDomain: req.params.domain, headers: {}});
+    db.getHeadersList(req.params.domain, false, res, function(res, err, headers) {
+        Object.keys(headers).forEach(header => headers[header] = (req.body[header] ? true : false));
+        db.updateHeadersList(req.params.domain, false, headers);
+        res.render('headerselection', {selectedDomain: req.params.domain, headers: headers, isForwardHeaders: false, status: "Updated headers selection"});
+    });
 }
 
 exports.adminReturnHeadersPage = function(req, res) {
-    res.render('headerselection', {selectedDomain: req.params.domain, headers: {}});
+    db.getHeadersList(req.params.domain, false, res, function(res, err, headers) {
+        res.render('headerselection', {selectedDomain: req.params.domain, headers: headers, isForwardHeaders: false});
+    });
 }
 
 exports.adminJsonEditor = function(req, res) {

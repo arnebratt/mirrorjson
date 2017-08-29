@@ -4,8 +4,8 @@ var mongoose = require('mongoose'),
 var DomainSchema = new Schema({
     localDomain: {type: String, unique: true},
     remoteDomain: {type: String, index: false},
-    forwardHeaders: {type: Array, index: false},
-    returnHeaders: {type: Array, index: false}
+    forwardHeaders: {type: Object, index: false},
+    returnHeaders: {type: Object, index: false}
 }, { collection: 'mirrorjson_domain_match' });
 
 mongoose.model('Domain', DomainSchema);

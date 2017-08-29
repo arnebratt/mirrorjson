@@ -1,6 +1,6 @@
 let db = require('../lib/database'),
     request = require('request');
-let enableExternal = true
+let enableExternal = true,
     forwardHeaders = ['set-cookie', 'cookie'],
     returnHeaders = ['server', 'served-by', 'expires', 'cache-control', 'pragma', 'x-powered-by', 'content-language', 'content-type', 'set-cookie', 'last-modified', 'transfer-encoding', 'date'];
 
@@ -27,13 +27,13 @@ let getPostBody = function(req, callback) {
 }
 
 // Fetch json data from external API
-let getExternalData = function(url, headers, body, callback) {
+let getExternalData = function(url, headers, sendHeaders, body, callback) {
     let options = {
         uri : url,
         method : (body !== "") ? 'POST' : 'GET',
         headers: {}
     }
-    forwardHeaders.forEach(value => {
+    sendHeaders.forEach(value => {
         value = value.toLowerCase();
         if (headers[value]) {
             options.headers[value] = headers[value];
@@ -46,7 +46,7 @@ let getExternalData = function(url, headers, body, callback) {
     request(options, callback);
 }
 
-let sendResultJson = function(res, err, headers, json) {
+let sendResultJson = function(res, headers, sendHeaders, json) {
     if (json) {
         if (!headers) {
             // Reset headers if it is undefined from database
@@ -55,7 +55,7 @@ let sendResultJson = function(res, err, headers, json) {
         try {
             headers = JSON.parse(headers);
             json = JSON.parse(json);
-            returnHeaders.forEach(value => {
+            sendHeaders.forEach(value => {
                 value = value.toLowerCase();
                 if (headers[value]) {
                     res.header(value, headers[value]);
@@ -76,24 +76,34 @@ exports.postData = function(req, res) {
     // Give access to any site for these data
     res.header("Access-Control-Allow-Origin", "*");
 
+    // Add HTTP POST parameters in req and build path
     getPostBody(req, function() {
         let path = req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
+        // Get the paths document from database if it exist
         db.getElement(req.get('host'), null, path, res, function(res, err, results) {
             let isProtected = (results && results.isProtected);
             if (enableExternal && !isProtected) {
+                // If not protected, get external url and it's data
                 db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
-                    getExternalData(url, req.headers, req.jsonBody, function(externalErr, externalResults, body) {
-                        if (externalResults && externalResults.statusCode === 200) {
-                            let headers = (externalResults) ? JSON.stringify(externalResults.headers) : "";
-                            db.storeData(req.get('host'), null, path, headers, body);
-                            sendResultJson(res, err, headers, body);
-                        } else {
-                            sendResultJson(res, err, (results) ? results.headers : "", (results) ? results.json : "");
-                        }
+                    db.updateHeadersList(req.get('host'), true, req.headers, res, function(err, sendHeaders) {
+                        getExternalData(url, req.headers, sendHeaders, req.jsonBody, function(externalErr, externalResults, body) {
+                            if (externalResults && externalResults.statusCode === 200) {
+                                // Save data in database and pass back to frontend
+                                let headers = (externalResults) ? JSON.stringify(externalResults.headers) : "";
+                                db.storeData(req.get('host'), null, path, headers, body);
+                                db.updateHeadersList(req.get('host'), false, (externalResults) ? externalResults.headers : {}, res, function(err, sendHeaders) {
+                                    sendResultJson(res, headers, sendHeaders, body);
+                                });
+                            } else {
+                                // Return data from database if possible
+                                sendResultJson(res, (results) ? results.headers : "", (results) ? results.json : "");
+                            }
+                        });
                     });
                 });
             } else {
-                sendResultJson(res, err, (results) ? results.headers : "", (results) ? results.json : "");
+                // Return data from database if possible
+                sendResultJson(res, (results) ? results.headers : "", (results) ? results.json : "");
             }
         });
     });
