@@ -23,10 +23,12 @@ let addJson = function(req, res) {
     if (path || hash) {
         try {
             let setProtected = (req.body.setprotected) ? true : false;
-            JSON.parse(req.body.headers);
+            let headers = JSON.parse(req.body.headers);
             JSON.parse(req.body.jsondata);
             db.storeData(req.params.domain, hash, path, req.body.headers, req.body.jsondata, setProtected, function(err, numberAffected) {
-                listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
+                db.updateHeadersList(req.params.domain, false, headers, res, function(err, sendHeaders) {
+                    listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
+                });
             })
         } catch(e) {
             res.send("Error: json data conversion failed for :\n" + req.body.jsondata + "\n\n" + req.body.headers);
@@ -82,6 +84,7 @@ exports.adminElementsImportPage = function(req, res) {
     res.render('elementsimport', {selectedDomain: req.params.domain});
 }
 
+// Update forward headers settings for currently selected domain
 exports.adminForwardHeaders = function(req, res) {
     db.getHeadersList(req.params.domain, true, res, function(res, err, headers) {
         Object.keys(headers).forEach(header => headers[header] = (req.body[header] ? true : false));
@@ -96,6 +99,7 @@ exports.adminForwardHeadersPage = function(req, res) {
     });
 }
 
+// Update return headers settings for currently selected domain
 exports.adminReturnHeaders = function(req, res) {
     db.getHeadersList(req.params.domain, false, res, function(res, err, headers) {
         Object.keys(headers).forEach(header => headers[header] = (req.body[header] ? true : false));

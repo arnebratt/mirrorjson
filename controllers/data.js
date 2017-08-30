@@ -1,8 +1,6 @@
 let db = require('../lib/database'),
     request = require('request');
-let enableExternal = true,
-    forwardHeaders = ['set-cookie', 'cookie'],
-    returnHeaders = ['server', 'served-by', 'expires', 'cache-control', 'pragma', 'x-powered-by', 'content-language', 'content-type', 'set-cookie', 'last-modified', 'transfer-encoding', 'date'];
+let enableExternal = true;
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
 exports.enableExternal = function(useExternal) {

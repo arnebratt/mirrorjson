@@ -87,6 +87,5 @@ For complex projects you can combine multiple hosts and ports, matching each com
 Todo
 ====
 
-* Add custom header input field
 * Refactor error situations to use exceptions and return json
 * Add support for XML?
