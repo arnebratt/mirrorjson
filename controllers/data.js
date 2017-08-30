@@ -96,14 +96,18 @@ exports.postData = function(req, res) {
                                 });
                             } else {
                                 // Return data from database if possible
-                                sendResultJson(res, (results) ? results.headers : "", (results) ? results.json : "");
+                                db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
+                                    sendResultJson(res, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                                });
                             }
                         });
                     });
                 });
             } else {
                 // Return data from database if possible
-                sendResultJson(res, (results) ? results.headers : "", (results) ? results.json : "");
+                db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
+                    sendResultJson(res, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                });
             }
         });
     });
