@@ -31,10 +31,10 @@ let getExternalData = function(url, headers, sendHeaders, body, callback) {
         method : (body !== "") ? 'POST' : 'GET',
         headers: {}
     }
-    sendHeaders.forEach(value => {
-        value = value.toLowerCase();
-        if (headers[value]) {
-            options.headers[value] = headers[value];
+    sendHeaders.forEach(header => {
+        header = header.toLowerCase();
+        if (headers[header]) {
+            options.headers[header] = headers[header];
         }
     });
     if (body !== "") {
@@ -53,10 +53,17 @@ let sendResultJson = function(res, headers, sendHeaders, json) {
         try {
             headers = JSON.parse(headers);
             json = JSON.parse(json);
-            sendHeaders.forEach(value => {
-                value = value.toLowerCase();
-                if (headers[value]) {
-                    res.header(value, headers[value]);
+            // Give access to any site for these data
+            res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            res.header("Access-Control-Allow-Credentials", "true");
+            res.header("Access-Control-Allow-Headers", "Content-Type");
+
+            sendHeaders.forEach(header => {
+                header = header.toLowerCase();
+                if (headers[header]) {
+                    res.header("Access-Control-Allow-Headers", header);
+                    res.header(header, headers[header]);
                 }
             });
             return res.json(json);
@@ -71,9 +78,6 @@ let sendResultJson = function(res, headers, sendHeaders, json) {
 
 // Get json from external API, or the mirrored data in local MongoDB database
 exports.postData = function(req, res) {
-    // Give access to any site for these data
-    res.header("Access-Control-Allow-Origin", "*");
-
     // Add HTTP POST parameters in req and build path
     getPostBody(req, function() {
         let path = req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
