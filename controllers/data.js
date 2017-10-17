@@ -87,10 +87,10 @@ exports.postData = function(req, res) {
     // Add HTTP POST parameters in req and build path
     getPostBody(req, function() {
         let path = req.method + " " + req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
-        console.log(path);
         // Get the paths document from database if it exist
         db.getElement(req.get('host'), null, path, res, function(res, err, results) {
             let isProtected = (results && results.isProtected);
+            console.log(path, (!enableExternal || isProtected) ? "(protected data, fetched from database)" : "");
             if (enableExternal && !isProtected) {
                 // If not protected, get external url and it's data
                 db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
@@ -114,7 +114,6 @@ exports.postData = function(req, res) {
                 });
             } else {
                 // Return data from database if possible
-                console.log("Protected data (fetched from database)");
                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
                     sendResultJson(res, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
                 });
