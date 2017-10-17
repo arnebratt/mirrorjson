@@ -9,6 +9,12 @@ exports.enableExternal = function(useExternal) {
 
 // Get HTTP POST parameters
 let getPostBody = function(req, callback) {
+    // Get body data only on POST method
+    if (req.method !== "POST") {
+        req.jsonBody = "";
+        callback();
+        return;
+    }
     let rawBody = '';
     req.on("data",function(chunk){
         rawBody += chunk.toString();
@@ -20,7 +26,7 @@ let getPostBody = function(req, callback) {
             return (lines.length > 3) ? regexp.exec(lines[1])[1] + "=" + lines[3] : '';
         }).filter(str => str);
         req.jsonBody = params.join("&");
-        callback()
+        callback();
     });
 }
 
@@ -80,7 +86,8 @@ let sendResultJson = function(res, headers, sendHeaders, json) {
 exports.postData = function(req, res) {
     // Add HTTP POST parameters in req and build path
     getPostBody(req, function() {
-        let path = req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
+        let path = req.method + " " + req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
+        console.log(path);
         // Get the paths document from database if it exist
         db.getElement(req.get('host'), null, path, res, function(res, err, results) {
             let isProtected = (results && results.isProtected);
@@ -107,6 +114,7 @@ exports.postData = function(req, res) {
                 });
             } else {
                 // Return data from database if possible
+                console.log("Protected data (fetched from database)");
                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
                     sendResultJson(res, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
                 });
