@@ -1,33 +1,21 @@
 let db = require('../lib/database'),
     request = require('request');
-let enableExternal = true;
+let enableExternal = true,
+    includePostData = false;
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
 exports.enableExternal = function(useExternal) {
     enableExternal = useExternal;
 };
+exports.includePostData = function(usePost) {
+    includePostData = usePost;
+};
 
 // Get HTTP POST parameters
 let getPostBody = function(req, callback) {
-    // Get body data only on POST method
-    if (req.method !== "POST") {
-        req.jsonBody = "";
-        callback();
-        return;
-    }
-    let rawBody = '';
-    req.on("data",function(chunk){
-        rawBody += chunk.toString();
-    });
-    req.on("end", function() {
-        let regexp = /^Content\-Disposition\: form\-data\; name\=\"(.*?)\"$/;
-        let params = rawBody.split("------------------------------").map(str => {
-            let lines = str.split("\r\n");
-            return (lines.length > 3) ? regexp.exec(lines[1])[1] + "=" + lines[3] : '';
-        }).filter(str => str);
-        req.jsonBody = params.join("&");
-        callback();
-    });
+    // Get body data only on POST/PUT method
+    req.jsonBody = (req.method === "POST" || req.method === "PUT") ? req.body : "";
+    callback();
 }
 
 // Fetch json data from external API
@@ -61,7 +49,7 @@ let sendResultJson = function(res, headers, sendHeaders, json) {
             json = JSON.parse(json);
             // Give access to any site for these data
             res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT");
             res.header("Access-Control-Allow-Credentials", "true");
             res.header("Access-Control-Allow-Headers", "Content-Type");
 
@@ -86,7 +74,10 @@ let sendResultJson = function(res, headers, sendHeaders, json) {
 exports.postData = function(req, res) {
     // Add HTTP POST parameters in req and build path
     getPostBody(req, function() {
-        let path = req.method + " " + req.originalUrl + ((req.jsonBody !== "") ? " " + req.jsonBody : "");
+        let path = req.method + " " + req.originalUrl;
+        if (includePostData && req.jsonBody !== "") {
+            path = path + " " + req.jsonBody;
+        }
         // Get the paths document from database if it exist
         db.getElement(req.get('host'), null, path, res, function(res, err, results) {
             let isProtected = (results && results.isProtected);

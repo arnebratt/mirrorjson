@@ -27,6 +27,9 @@ process.argv.forEach(function (val, index, array) {
     if (val === "--disable-external") {
         dataCtrl.enableExternal(false);
     }
+    if (val === "--include-post-data") {
+        dataCtrl.includePostData(true);
+    }
 });
 
 // Connect to Mongo DB database
@@ -44,6 +47,7 @@ try {
     // Support HTTP POST json encoded bodies and encoded bodies
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.raw());
     // Configuring Handlebars template engine
     app.set('view engine', 'hbs');
     app.set('views', './templates');
@@ -77,10 +81,11 @@ try {
 // Start server on selected port
 app.listen(port);
 
-console.log("> node server.js [--port=<port>] [--disable-external]");
+console.log("> node server.js [--port=<port>] [--disable-external] [--include-post-data]");
 console.log("");
 console.log("Port must be between 0 and 65536. Default is 3001.");
 console.log("When --disable-external is set, only local database data is returned.");
+console.log("When --include-post-data is set, POST/PUT data are included in url match. You can then return multiple results depending on the data sent in.");
 console.log("");
 console.log("Listening on port " + port);
 console.log("");
