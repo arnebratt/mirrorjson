@@ -18,7 +18,8 @@ let listElements = function(req, res, status = "") {
 // Add json data for the current domain and specified hash
 let addJson = function(req, res) {
     let hash = (req.body.hash) ? req.body.hash : null;
-    let path = decodeURI(req.body.path);
+    let method = (req.body.method) ? req.body.method : 'GET';
+    let path = method + ' ' + decodeURI(req.body.path);
 
     if (path || hash) {
         try {

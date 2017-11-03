@@ -30,7 +30,18 @@
 <form method="POST" action="/mirrorjson/{{selectedDomain}}">
     <p>Be aware: Existing data for the given path will be overwritten.</p>
     <label>Path:</label>
-    <input type="text" name="path" value="GET /" />
+    <select name="method">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="OPTIONS">OPTIONS</option>
+        <option value="PATCH">PATCH</option>
+        <option value="DELETE">DELETE</option>
+        <option value="HEAD">HEAD</option>
+        <option value="TRACE">TRACE</option>
+        <option value="CONNECT">CONNECT</option>
+    </select>
+    <input type="text" name="path" value="/" />
     <br />
     <label>Json:</label>
     <textarea name="jsondata" rows="10" cols="100"></textarea>

@@ -87,5 +87,6 @@ For complex projects you can combine multiple hosts and ports, matching each com
 Todo
 ====
 
+* Add delay parameter to slow down "internet" speed
 * Refactor error situations to use exceptions and return json
 * Add support for XML?
