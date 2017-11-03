@@ -1,7 +1,8 @@
 let db = require('../lib/database'),
     request = require('request');
 let enableExternal = true,
-    includePostData = false;
+    includePostData = false,
+    delayOnResponse = 0;
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
 exports.enableExternal = function(useExternal) {
@@ -9,6 +10,9 @@ exports.enableExternal = function(useExternal) {
 };
 exports.includePostData = function(usePost) {
     includePostData = usePost;
+};
+exports.setDelayOnResponse = function(useDelay) {
+    delayOnResponse = useDelay;
 };
 
 // Get HTTP POST parameters
@@ -38,7 +42,7 @@ let getExternalData = function(url, headers, sendHeaders, body, callback) {
     request(options, callback);
 }
 
-let sendResultJson = function(res, headers, sendHeaders, json) {
+let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
     if (json) {
         if (!headers) {
             // Reset headers if it is undefined from database
@@ -70,9 +74,17 @@ let sendResultJson = function(res, headers, sendHeaders, json) {
     }
 }
 
+let sendResultJson = function(res, headers, sendHeaders, json) {
+    if (delayOnResponse > 0) {
+        setTimeout(function() {sendResultJsonDelayed(res, headers, sendHeaders, json);}, delayOnResponse * 1000);
+    } else {
+        sendResultJsonDelayed(res, headers, sendHeaders, json);
+    }
+}
+
 // Get json from external API, or the mirrored data in local MongoDB database
 exports.postData = function(req, res) {
-    // Add HTTP POST parameters in req and build path
+    // Add HTTP POST parameters in req and possibly build path
     getPostBody(req, function() {
         let path = req.method + " " + req.originalUrl;
         if (includePostData && req.jsonBody !== "") {
