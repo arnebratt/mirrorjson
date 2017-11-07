@@ -18,15 +18,15 @@ exports.setDelayOnResponse = function(useDelay) {
 // Get HTTP POST parameters
 let getPostBody = function(req, callback) {
     // Get body data only on POST/PUT method
-    req.jsonBody = (req.method === "POST" || req.method === "PUT") ? req.body : "";
+    req.jsonBody = (req.method === "POST" || req.method === "PUT") ? JSON.stringify(req.body) : "";
     callback();
 }
 
 // Fetch json data from external API
-let getExternalData = function(url, headers, sendHeaders, body, callback) {
+let getExternalData = function(method, url, headers, sendHeaders, body, callback) {
     let options = {
         uri : url,
-        method : (body !== "") ? 'POST' : 'GET',
+        method : method,
         headers: {}
     }
     sendHeaders.forEach(header => {
@@ -98,7 +98,7 @@ exports.postData = function(req, res) {
                 // If not protected, get external url and it's data
                 db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
                     db.updateHeadersList(req.get('host'), true, req.headers, res, function(err, sendHeaders) {
-                        getExternalData(url, req.headers, sendHeaders, req.jsonBody, function(externalErr, externalResults, body) {
+                        getExternalData(req.method, url, req.headers, sendHeaders, req.jsonBody, function(externalErr, externalResults, body) {
                             if (externalResults && externalResults.statusCode === 200) {
                                 // Save data in database and pass back to frontend
                                 let headers = (externalResults) ? JSON.stringify(externalResults.headers) : "";
