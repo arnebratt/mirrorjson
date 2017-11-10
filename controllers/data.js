@@ -50,25 +50,33 @@ let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
         }
         try {
             headers = JSON.parse(headers);
-            json = JSON.parse(json);
-            // Give access to any site for these data
-            res.header("Access-Control-Allow-Origin", "*");
-            res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT");
-            res.header("Access-Control-Allow-Credentials", "true");
-            res.header("Access-Control-Allow-Headers", "Content-Type");
+        } catch(e) {
+            console.log("Failed converting header string to json", headers, e);
+            res.send("Error: Header data conversion failed for :\n" + headers);
+        }
 
-            sendHeaders.forEach(header => {
-                header = header.toLowerCase();
-                if (headers[header]) {
-                    res.header("Access-Control-Allow-Headers", header);
-                    res.header(header, headers[header]);
-                }
-            });
+        // Give access to any site for these data
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT");
+        res.header("Access-Control-Allow-Credentials", "true");
+        res.header("Access-Control-Allow-Headers", "Content-Type");
+
+        sendHeaders.forEach(header => {
+            header = header.toLowerCase();
+            if (headers[header]) {
+                res.header("Access-Control-Allow-Headers", header);
+                res.header(header, headers[header]);
+            }
+        });
+
+        // Convert and send body
+        try {
+            json = JSON.parse(json);
             return res.json(json);
         } catch(e) {
-            console.log(e);
-            res.send("Error: json data conversion failed for :\n" + json);
+            console.log("Failed converting to json", json, e);
         }
+        return res.send(json);
     } else {
         return res.send("Error: Requested data not found");
     }
