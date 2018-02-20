@@ -5,7 +5,7 @@
 <ul>
     {{#results}}
         <li>
-            <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}"{{#if path}} title="{{path}}"{{/if}}>{{hash}}</a>
+            <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}" title="{{hash}}">{{#if path}}{{path}}{{else}}{{hash}}{{/if}}</a>
             =>
             {{json}}
         </li>
