@@ -74,7 +74,7 @@ let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
             json = JSON.parse(json);
             return res.json(json);
         } catch(e) {
-            console.log("Failed converting to json", json, e);
+            console.log("Failed converting to json", [json]);
         }
         return res.send(json);
     } else {
