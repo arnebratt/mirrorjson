@@ -6,6 +6,7 @@ var express = require('express'),
     hbs = require('hbs'),
     packageJson = require('./package.json'),
     port = 3001;
+    jsonMaxSize = 10;
 
 require("./models/json");
 require("./models/domain_match");
@@ -39,6 +40,15 @@ process.argv.forEach(function (val, index, array) {
             process.exit();
         }
     }
+    if (val.indexOf("--json-max-size") === 0) {
+        let tmpSize = parseInt(val.split("=")[1]);
+        if (tmpSize > 0) {
+            jsonMaxSize = tmpSize;
+        } else {
+            console.log("Error: --json-max-size parameter has the wrong format, exiting");
+            process.exit();
+        }
+    }
 });
 
 // Connect to Mongo DB database
@@ -54,6 +64,7 @@ try {
     // For handling HTTP file upload
     app.use(busboy());
     // Support HTTP POST json encoded bodies and encoded bodies
+    app.use(bodyParser.text({type : 'application/json', limit: jsonMaxSize + 'mb'}));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.raw());
@@ -90,12 +101,13 @@ try {
 // Start server on selected port
 app.listen(port);
 
-console.log("> node server.js [--port=<port>] [--disable-external] [--include-post-data] [--delay-on-response=<delay>]");
+console.log("> node server.js [--port=<port>] [--disable-external] [--include-post-data] [--delay-on-response=<delay>] [--json-max-size=<size>]");
 console.log("");
 console.log("Port must be between 0 and 65536. Default is 3001.");
 console.log("When --disable-external is set, only local database data is returned.");
 console.log("When --include-post-data is set, POST/PUT data are included in url match. You can then return multiple results depending on the data sent in.");
 console.log("--delay-on-response can specify a delay in seconds to delay the response (can be set between 0 and 600). It will allow you to test a slow connection.");
+console.log("--json-max-size specify the max size of the json input in MB (default set to 10MB)");
 console.log("");
 console.log("Listening on port " + port);
 console.log("");
