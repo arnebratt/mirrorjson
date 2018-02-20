@@ -2,7 +2,8 @@ let db = require('../lib/database'),
     request = require('request');
 let enableExternal = true,
     includePostData = false,
-    delayOnResponse = 0;
+    delayOnResponse = 0,
+    corsAllowedUrl = "*";
 
 // Enable or disable the use of external data (when disabled will only return data from Mongo DB)
 exports.enableExternal = function(useExternal) {
@@ -13,6 +14,9 @@ exports.includePostData = function(usePost) {
 };
 exports.setDelayOnResponse = function(useDelay) {
     delayOnResponse = useDelay;
+};
+exports.setCorsURL = function(corsUrl) {
+    corsAllowedUrl = corsUrl;
 };
 
 // Get HTTP POST parameters
@@ -50,6 +54,27 @@ let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
         }
         try {
             headers = JSON.parse(headers);
+        } catch(e) {
+            console.log("Failed converting header string to json", headers, e);
+            res.send("Error: Header data conversion failed for :\n" + headers);
+        }
+
+        // Give access to any site for these data
+        res.header("Access-Control-Allow-Origin", corsAllowedUrl);
+        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT");
+        res.header("Access-Control-Allow-Credentials", "true");
+        res.header("Access-Control-Allow-Headers", "Content-Type");
+
+        sendHeaders.forEach(header => {
+            header = header.toLowerCase();
+            if (headers[header]) {
+                res.header("Access-Control-Allow-Headers", header);
+                res.header(header, headers[header]);
+            }
+        });
+
+        // Convert and send body
+        try {
             json = JSON.parse(json);
             // Give access to any site for these data
             res.header("Access-Control-Allow-Origin", "*");

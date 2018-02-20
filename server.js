@@ -5,7 +5,8 @@ var express = require('express'),
     busboy = require('connect-busboy'),
     hbs = require('hbs'),
     packageJson = require('./package.json'),
-    port = 3001;
+    port = 3001,
+    corsUrl = "",
     jsonMaxSize = 10;
 
 require("./models/json");
@@ -30,6 +31,15 @@ process.argv.forEach(function (val, index, array) {
     }
     if (val === "--include-post-data") {
         dataCtrl.includePostData(true);
+    }
+    if (val.indexOf("--cors-url") === 0) {
+        corsUrl = val.split("=")[1];
+        if (corsUrl.indexOf("http") === 0) {
+            dataCtrl.setCorsURL(corsUrl);
+        } else {
+            console.log("Error: --cors-url parameter has the wrong format, exiting");
+            process.exit();
+        }
     }
     if (val.indexOf("--delay-on-response") === 0) {
         let tmpDelay = parseInt(val.split("=")[1]);
@@ -106,8 +116,12 @@ console.log("");
 console.log("Port must be between 0 and 65536. Default is 3001.");
 console.log("When --disable-external is set, only local database data is returned.");
 console.log("When --include-post-data is set, POST/PUT data are included in url match. You can then return multiple results depending on the data sent in.");
+console.log("--cors-url can be set to specify CORS url as the url used in the browser (default is '*').");
 console.log("--delay-on-response can specify a delay in seconds to delay the response (can be set between 0 and 600). It will allow you to test a slow connection.");
 console.log("--json-max-size specify the max size of the json input in MB (default set to 10MB)");
 console.log("");
 console.log("Listening on port " + port);
+if (corsUrl.length > 0) {
+    console.log("CORS URL: " + corsUrl);
+}
 console.log("");
