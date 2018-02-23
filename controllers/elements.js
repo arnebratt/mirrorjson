@@ -25,7 +25,6 @@ let addJson = function(req, res) {
         try {
             let setProtected = (req.body.setprotected) ? true : false;
             let headers = JSON.parse(req.body.headers);
-            JSON.parse(req.body.jsondata);
             db.storeData(req.params.domain, hash, path, req.body.headers, req.body.jsondata, setProtected, function(err, numberAffected) {
                 db.updateHeadersList(req.params.domain, false, headers, res, function(err, sendHeaders) {
                     listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
@@ -44,7 +43,7 @@ let exportJson = function(req, res) {
     db.getSiteElements(req.params.domain, res, function(err, results) {
         let docs = results.map(data => {
             try {
-                return {hash: data.hash, path: data.path, header: data.header, json: JSON.parse(data.json), isProtected: data.isProtected}
+                return {hash: data.hash, path: data.path, header: data.header, json: data.json, isProtected: data.isProtected}
             } catch(e) {
                 res.send("Error: json data conversion failed for :\n" + data.json);
             }
