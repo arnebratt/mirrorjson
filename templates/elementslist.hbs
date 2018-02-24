@@ -4,11 +4,13 @@
 
 <ul>
     {{#results}}
+        {{#if isNotTogether}}<br />{{/if}}
         <li>
             <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}" title="{{hash}}">{{#if path}}{{path}}{{else}}{{hash}}{{/if}}</a>
             =>
             {{json}} ({{statusCode}})
         </li>
+
     {{/results}}
 </ul>
 

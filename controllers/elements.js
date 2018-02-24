@@ -5,13 +5,21 @@ let db = require('../lib/database'),
 let listElements = function(req, res, status = "") {
     const SHOW_PATH_LENGTH = 60;
     const SHOW_JSON_LENGTH = 600;
+    const GROUP_IN_SECONDS = 15;
     db.getSiteElements(req.params.domain, res, function(err, results) {
-        let list = results.map(json => ({
-            hash: json.hash,
-            path: json.path ? json.path.substring(0, SHOW_PATH_LENGTH) + (json.path.length > SHOW_PATH_LENGTH ? "...+" + (json.path.length - SHOW_PATH_LENGTH) : "") : '',
-            statusCode: json.statusCode,
-            json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
-        }));
+        let previous = results[0].lastAccessed;
+        let isNotTogether = false;
+        let list = results.map(json => {
+            isNotTogether = ((previous - json.lastAccessed) / 1000) >= GROUP_IN_SECONDS;
+            previous = json.lastAccessed;
+            return {
+                hash: json.hash,
+                path: json.path ? json.path.substring(0, SHOW_PATH_LENGTH) + (json.path.length > SHOW_PATH_LENGTH ? "...+" + (json.path.length - SHOW_PATH_LENGTH) : "") : '',
+                statusCode: json.statusCode,
+                json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : ""),
+                isNotTogether: isNotTogether
+            }
+        });
         res.render('elementslist', {results: list, selectedDomain: req.params.domain, status: status});
     });
 }
