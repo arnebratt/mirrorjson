@@ -46,7 +46,9 @@ let getExternalData = function(method, url, headers, sendHeaders, body, callback
     request(options, callback);
 }
 
-let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
+let sendResultJsonDelayed = function(res, statusCode, headers, sendHeaders, json) {
+    res.status(statusCode);
+
     if (json) {
         if (!headers) {
             // Reset headers if it is undefined from database
@@ -56,6 +58,7 @@ let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
             headers = JSON.parse(headers);
         } catch(e) {
             console.log("Failed converting header string to json", headers, e);
+            res.status(500);
             res.send("Error: Header data conversion failed for :\n" + headers);
         }
 
@@ -82,15 +85,15 @@ let sendResultJsonDelayed = function(res, headers, sendHeaders, json) {
         }
         return res.send(json);
     } else {
-        return res.send("Error: Requested data not found");
+        return res.json("{'MirrorJSON-Error': 'Requested data not found'}");
     }
 }
 
-let sendResultJson = function(res, headers, sendHeaders, json) {
+let sendResultJson = function(res, statusCode, headers, sendHeaders, json) {
     if (delayOnResponse > 0) {
-        setTimeout(function() {sendResultJsonDelayed(res, headers, sendHeaders, json);}, delayOnResponse * 1000);
+        setTimeout(function() {sendResultJsonDelayed(res, statusCode, headers, sendHeaders, json);}, delayOnResponse * 1000);
     } else {
-        sendResultJsonDelayed(res, headers, sendHeaders, json);
+        sendResultJsonDelayed(res, statusCode, headers, sendHeaders, json);
     }
 }
 
@@ -111,17 +114,17 @@ exports.postData = function(req, res) {
                 db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
                     db.updateHeadersList(req.get('host'), true, req.headers, res, function(err, sendHeaders) {
                         getExternalData(req.method, url, req.headers, sendHeaders, req.jsonBody, function(externalErr, externalResults, body) {
-                            if (externalResults && externalResults.statusCode === 200) {
+                            if (externalResults) {
                                 // Save data in database and pass back to frontend
                                 let headers = (externalResults) ? JSON.stringify(externalResults.headers) : "";
-                                db.storeData(req.get('host'), null, path, headers, body);
+                                db.storeData(req.get('host'), null, path, externalResults.statusCode, headers, body);
                                 db.updateHeadersList(req.get('host'), false, (externalResults) ? externalResults.headers : {}, res, function(err, sendHeaders) {
-                                    sendResultJson(res, headers, sendHeaders, body);
+                                    sendResultJson(res, externalResults.statusCode, headers, sendHeaders, body);
                                 });
                             } else {
                                 // Return data from database if possible
                                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
-                                    sendResultJson(res, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
                                 });
                             }
                         });
@@ -130,7 +133,7 @@ exports.postData = function(req, res) {
             } else {
                 // Return data from database if possible
                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
-                    sendResultJson(res, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
                 });
             }
         });

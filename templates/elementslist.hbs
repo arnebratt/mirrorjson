@@ -7,7 +7,7 @@
         <li>
             <a href="/mirrorjson/{{../selectedDomain}}/{{hash}}" title="{{hash}}">{{#if path}}{{path}}{{else}}{{hash}}{{/if}}</a>
             =>
-            {{json}}
+            {{json}} ({{statusCode}})
         </li>
     {{/results}}
 </ul>
@@ -29,6 +29,9 @@
 <h2>Add a json string manually for specified path on '{{selectedDomain}}'</h2>
 <form method="POST" action="/mirrorjson/{{selectedDomain}}">
     <p>Be aware: Existing data for the given path will be overwritten.</p>
+    <label>Status code:</label>
+    <input type="text" name="statuscode" value="200" maxlength="3" />
+    <br />
     <label>Path:</label>
     <select name="method">
         <option value="GET">GET</option>

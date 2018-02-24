@@ -4,6 +4,9 @@
     <input type="hidden" name="hash" value="{{hash}}" />
     <input id="headers" type="hidden" name="headers" value="" />
     <input id="jsondata" type="hidden" name="jsondata" value="" />
+    <label>Status code:</label>
+    <input type="text" name="statuscode" value="{{statusCode}}" maxlength="3" />
+    <br />
     <input type="checkbox" name="setprotected" {{#if isProtected}}checked="checked"{{/if}} />
     <label>Set this json as protected (will not be overwritten by external API data)</label>
     <br />

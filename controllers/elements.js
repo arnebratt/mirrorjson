@@ -9,6 +9,7 @@ let listElements = function(req, res, status = "") {
         let list = results.map(json => ({
             hash: json.hash,
             path: json.path ? json.path.substring(0, SHOW_PATH_LENGTH) + (json.path.length > SHOW_PATH_LENGTH ? "...+" + (json.path.length - SHOW_PATH_LENGTH) : "") : '',
+            statusCode: json.statusCode,
             json: json.json.substring(0, SHOW_JSON_LENGTH) + (json.json.length > SHOW_JSON_LENGTH ? "...+" + (json.json.length - SHOW_JSON_LENGTH) : "")
         }));
         res.render('elementslist', {results: list, selectedDomain: req.params.domain, status: status});
@@ -20,12 +21,13 @@ let addJson = function(req, res) {
     let hash = (req.body.hash) ? req.body.hash : null;
     let method = (req.body.method) ? req.body.method : 'GET';
     let path = method + ' ' + decodeURI(req.body.path);
+    let statusCode = (req.body.statuscode) ? req.body.statuscode : 200;
 
     if (path || hash) {
         try {
             let setProtected = (req.body.setprotected) ? true : false;
             let headers = JSON.parse(req.body.headers);
-            db.storeData(req.params.domain, hash, path, req.body.headers, req.body.jsondata, setProtected, function(err, numberAffected) {
+            db.storeData(req.params.domain, hash, path, statusCode, req.body.headers, req.body.jsondata, setProtected, function(err, numberAffected) {
                 db.updateHeadersList(req.params.domain, false, headers, res, function(err, sendHeaders) {
                     listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
                 });
@@ -43,7 +45,7 @@ let exportJson = function(req, res) {
     db.getSiteElements(req.params.domain, res, function(err, results) {
         let docs = results.map(data => {
             try {
-                return {hash: data.hash, path: data.path, header: data.header, json: data.json, isProtected: data.isProtected}
+                return {hash: data.hash, path: data.path, statusCode: data.statusCode, header: data.header, json: data.json, isProtected: data.isProtected}
             } catch(e) {
                 res.send("Error: json data conversion failed for :\n" + data.json);
             }
@@ -69,7 +71,7 @@ exports.adminElementsImport = function(req, res) {
             try {
                 let jsondata = JSON.parse(chunks.join(''));
                 jsondata.forEach(data => {
-                    db.storeData(req.params.domain, data.hash, data.path, data.headers, JSON.stringify(data.json), data.isProtected);
+                    db.storeData(req.params.domain, data.hash, data.path, data.statusCode ? data.statusCode : 200, data.headers, JSON.stringify(data.json), data.isProtected);
                 });
                 res.render('elementsimport', {selectedDomain: req.params.domain, status: "Updated data from file " + filename});
             } catch(err) {
@@ -118,6 +120,7 @@ exports.adminJsonEditor = function(req, res) {
     db.getElement(req.params.domain, req.params.hash, null, res, function(res, err, currentData) {
         if (currentData) {
             res.render('jsoneditor', {
+                statusCode: currentData.statusCode,
                 headers: currentData.headers || '{}',
                 json: currentData.json,
                 hash: currentData.hash,
