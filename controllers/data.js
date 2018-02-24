@@ -85,7 +85,7 @@ let sendResultJsonDelayed = function(res, statusCode, headers, sendHeaders, json
         }
         return res.send(json);
     } else {
-        return res.json("{'MirrorJSON-Error': 'Requested data not found'}");
+        return res.json('{"MirrorJSON-Error": "Requested data not found"}');
     }
 }
 
