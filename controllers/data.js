@@ -22,7 +22,7 @@ exports.setCorsURL = function(corsUrl) {
 // Get HTTP POST parameters
 let getPostBody = function(req, callback) {
     // Get body data only on POST/PUT method
-    req.jsonBody = (req.method === "POST" || req.method === "PUT") ? JSON.stringify(req.body) : "";
+    req.jsonBody = (req.method === "POST" || req.method === "PUT") ? req.body : "";
     callback();
 }
 
@@ -97,6 +97,27 @@ let sendResultJson = function(res, statusCode, headers, sendHeaders, json) {
     }
 }
 
+let doAutomagic = function(host, input_body, output_results) {
+    let input, output;
+    let method = output_results.path.split(" ", 2)[0];
+    if (method === "GET") {
+        return output_results;
+    }
+    try {
+        input = JSON.parse(input_body);
+        output = JSON.parse(output_results.json);
+    } catch(e) {
+        return output_results;
+    }
+    if (method === "PUT") {
+        const result_json = JSON.stringify(Object.assign({}, output, input));
+        output_results.json = result_json;
+        db.storeData(host, null, output_results.path, output_results.statusCode, output_results.headers, output_results.json);
+        return output_results;
+    }
+    return output_results;
+}
+
 // Get json from external API, or the mirrored data in local MongoDB database
 exports.postData = function(req, res) {
     // Add HTTP POST parameters in req and possibly build path
@@ -122,6 +143,7 @@ exports.postData = function(req, res) {
                                     sendResultJson(res, externalResults.statusCode, headers, sendHeaders, body);
                                 });
                             } else {
+                                results = doAutomagic(req.get('host'), req.jsonBody, results);
                                 // Return data from database if possible
                                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
                                     sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
@@ -131,6 +153,7 @@ exports.postData = function(req, res) {
                     });
                 });
             } else {
+                results = doAutomagic(req.get('host'), req.jsonBody, results);
                 // Return data from database if possible
                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
                     sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
