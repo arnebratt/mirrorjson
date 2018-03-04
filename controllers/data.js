@@ -1,4 +1,5 @@
 let db = require('../lib/database'),
+    magic = require('../lib/magic'),
     request = require('request');
 let enableExternal = true,
     includePostData = false,
@@ -85,7 +86,7 @@ let sendResultJsonDelayed = function(res, statusCode, headers, sendHeaders, json
         }
         return res.send(json);
     } else {
-        return res.json('{"MirrorJSON-Error": "Requested data not found"}');
+        return res.json({MirrorJSONError: "Requested data not found"});
     }
 }
 
@@ -95,27 +96,6 @@ let sendResultJson = function(res, statusCode, headers, sendHeaders, json) {
     } else {
         sendResultJsonDelayed(res, statusCode, headers, sendHeaders, json);
     }
-}
-
-let doAutomagic = function(host, input_body, output_results) {
-    let input, output;
-    let method = output_results.path.split(" ", 2)[0];
-    if (method === "GET") {
-        return output_results;
-    }
-    try {
-        input = JSON.parse(input_body);
-        output = JSON.parse(output_results.json);
-    } catch(e) {
-        return output_results;
-    }
-    if (method === "PUT") {
-        const result_json = JSON.stringify(Object.assign({}, output, input));
-        output_results.json = result_json;
-        db.storeData(host, null, output_results.path, output_results.statusCode, output_results.headers, output_results.json);
-        return output_results;
-    }
-    return output_results;
 }
 
 // Get json from external API, or the mirrored data in local MongoDB database
@@ -143,20 +123,22 @@ exports.postData = function(req, res) {
                                     sendResultJson(res, externalResults.statusCode, headers, sendHeaders, body);
                                 });
                             } else {
-                                results = doAutomagic(req.get('host'), req.jsonBody, results);
-                                // Return data from database if possible
-                                db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
-                                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                                magic.addMagic(req.get('host'), path, req.jsonBody, results, function(results) {
+                                    // Return data from database if possible
+                                    db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
+                                        sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                                    });
                                 });
                             }
                         });
                     });
                 });
             } else {
-                results = doAutomagic(req.get('host'), req.jsonBody, results);
-                // Return data from database if possible
-                db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
-                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                magic.addMagic(req.get('host'), path, req.jsonBody, results, function(results) {
+                    // Return data from database if possible
+                    db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
+                        sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                    });
                 });
             }
         });
