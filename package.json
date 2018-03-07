@@ -1,6 +1,6 @@
 {
   "name": "mirrorjson",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "main": "server.js",
   "author": "Arne Bakkebø",
   "license": "MIT",
