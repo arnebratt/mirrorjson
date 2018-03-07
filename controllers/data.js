@@ -66,15 +66,16 @@ let sendResultJsonDelayed = function(res, statusCode, headers, sendHeaders, json
         res.header("Access-Control-Allow-Origin", corsAllowedUrl);
         res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT");
         res.header("Access-Control-Allow-Credentials", "true");
-        res.header("Access-Control-Allow-Headers", "Content-Type");
 
+        const corsHeaders = ["Content-Type"];
         sendHeaders.forEach(header => {
             header = header.toLowerCase();
             if (headers[header]) {
-                res.header("Access-Control-Allow-Headers", header);
+                corsHeaders.push(header);
                 res.header(header, headers[header]);
             }
         });
+        res.header("Access-Control-Allow-Headers", corsHeaders.join(","));
 
         // Convert and send body
         try {
