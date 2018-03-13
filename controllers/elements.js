@@ -79,7 +79,7 @@ exports.adminElementsImport = function(req, res) {
             try {
                 let jsondata = JSON.parse(chunks.join(''));
                 jsondata.forEach(data => {
-                    db.storeData(req.params.domain, data.hash, data.path, data.statusCode ? data.statusCode : 200, data.headers, JSON.stringify(data.json), data.isProtected);
+                    db.storeData(req.params.domain, data.hash, data.path, data.statusCode ? data.statusCode : 200, data.headers, data.json, data.isProtected);
                 });
                 res.render('elementsimport', {selectedDomain: req.params.domain, status: "Updated data from file " + filename});
             } catch(err) {
