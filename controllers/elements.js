@@ -7,7 +7,7 @@ let listElements = function(req, res, status = "") {
     const SHOW_JSON_LENGTH = 600;
     const GROUP_IN_SECONDS = 15;
     db.getSiteElements(req.params.domain, res, function(err, results) {
-        let previous = results[0].lastAccessed;
+        let previous = (results && results[0]) ? results[0].lastAccessed : 0;
         let isNotTogether = false;
         let list = results.map(json => {
             isNotTogether = ((previous - json.lastAccessed) / 1000) >= GROUP_IN_SECONDS;

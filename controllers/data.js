@@ -23,6 +23,9 @@ exports.setCorsURL = function(corsUrl) {
 let getPostBody = function(req, callback) {
     // Get body data only on POST/PUT method
     req.jsonBody = (req.method === "POST" || req.method === "PUT") ? JSON.stringify(req.body) : "";
+    if (typeof req.jsonBody !== "string") {
+        req.jsonBody = "";
+    }
     callback();
 }
 
@@ -125,7 +128,7 @@ exports.postData = function(req, res) {
                             } else {
                                 // Return data from database if possible
                                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
-                                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : null, sendHeaders, (results) ? results.json : null);
                                 });
                             }
                         });
@@ -134,7 +137,7 @@ exports.postData = function(req, res) {
             } else {
                 // Return data from database if possible
                 db.updateHeadersList(req.get('host'), false, {}, res, function(err, sendHeaders) {
-                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : "", sendHeaders, (results) ? results.json : "");
+                    sendResultJson(res, (results) ? results.statusCode : 500, (results) ? results.headers : null, sendHeaders, (results) ? results.json : null);
                 });
             }
         });
