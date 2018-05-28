@@ -115,7 +115,7 @@ exports.postData = function(req, res) {
             console.log(path, (!enableExternal || isProtected) ? "(protected data, fetched from database)" : "");
             if (enableExternal && !isProtected) {
                 // If not protected, get external url and it's data
-                db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, function(url) {
+                db.getExternalUrl(req.protocol, req.get('host'), req.originalUrl, res, function(url) {
                     db.updateHeadersList(req.get('host'), true, req.headers, res, function(err, sendHeaders) {
                         getExternalData(req.method, url, req.headers, sendHeaders, req.jsonBody, function(externalErr, externalResults, body) {
                             if (externalResults) {

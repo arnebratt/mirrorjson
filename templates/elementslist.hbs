@@ -58,4 +58,13 @@
     <input type="submit" value="Save element" />
 </form>
 
+<h2>Add a domain alias</h2>
+<form method="POST" action="/mirrorjson/{{selectedDomain}}">
+    {{#aliases}}
+        <input type="text" name="alias[]" value="{{localDomain}}" /><br />
+    {{/aliases}}
+    <input type="text" name="alias[]" value="" />
+    <input type="submit" value="Save aliases" />
+</form>
+
 {{> footer }}

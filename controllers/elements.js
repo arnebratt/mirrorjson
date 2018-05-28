@@ -20,7 +20,9 @@ let listElements = function(req, res, status = "") {
                 isNotTogether: isNotTogether
             }
         });
-        res.render('elementslist', {results: list, selectedDomain: req.params.domain, status: status});
+        db.getDomainAliases(req.params.domain, function(aliases) {
+            res.render('elementslist', {results: list, selectedDomain: req.params.domain, aliases: aliases, status: status});
+        });
     });
 }
 
@@ -62,6 +64,24 @@ let exportJson = function(req, res) {
         res.setHeader('Content-disposition', 'attachment; filename=mirrorjson.json');
         res.set("Content-Type", "application/json");
         res.send(docs);
+    });
+}
+
+let setAliases = function(req, res) {
+    let total = req.body.alias.reduce((count, alias) => (alias !== "" ? count + 1 : count), 0);
+
+    db.getCurrentDomain(req.params.domain, res, function(currentSite) {
+        req.body.alias.map((alias, count, arr) => {
+            if (!res.headersSent && alias !== "") {
+
+                db.updateDomain(alias, null, currentSite._id, res, function() {
+                    total--;
+                    if (total === 0) {
+                        listElements(req, res, "Updated aliases");
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -144,6 +164,8 @@ exports.adminJsonEditor = function(req, res) {
 exports.adminElementsList = function(req, res) {
     if (req.body.jsondata) {
         addJson(req, res);
+    } else if (req.body.alias) {
+        setAliases(req, res);
     } else if (req.body.export) {
         exportJson(req, res);
     } else {

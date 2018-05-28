@@ -1,7 +1,7 @@
 let db = require('../lib/database'),
     handlebars = require('handlebars');
 
-// List all domains registered in the database with elements count
+// List all domains registered in the database, with elements count
 let listDomains = function(req, res, status = "") {
     db.getDomains(res, function(results) {
         let currentDomain = results.find(domain => domain.localDomain === req.get('host'));
@@ -19,7 +19,7 @@ let listDomains = function(req, res, status = "") {
 
 exports.adminDomainList = function(req, res) {
     if (req.body.domain) {
-        db.updateDomain(req.get('host'), req.body.domain, res, function(isNew) {
+        db.updateDomain(req.get('host'), req.body.domain, null, res, function(isNew) {
             listDomains(req, res, (isNew ? "Set an" : "Updated the") + " external domain to " + req.get('host'));
         });
     } else if (req.body.remove_domain) {
