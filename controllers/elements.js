@@ -37,12 +37,13 @@ let addJson = function(req, res) {
         try {
             let setProtected = (req.body.setprotected) ? true : false;
             let headers = JSON.parse(req.body.headers);
-            db.storeData(req.params.domain, hash, path, statusCode, req.body.headers, req.body.jsondata, setProtected, function(err, numberAffected) {
+            db.storeData(req.params.domain, hash, path, statusCode, req.body.headers, req.body.jsondata, setProtected, res, function(err, numberAffected) {
                 db.updateHeadersList(req.params.domain, false, headers, res, function(err, sendHeaders) {
                     listElements(req, res, "Json stored for " + (hash ? "hash '" + hash : "path '" + path) + "'");
                 });
             })
         } catch(e) {
+            console.log(e);
             res.send("Error: json data conversion failed for :\n" + req.body.jsondata + "\n\n" + req.body.headers);
         }
     } else {
@@ -99,7 +100,7 @@ exports.adminElementsImport = function(req, res) {
             try {
                 let jsondata = JSON.parse(chunks.join(''));
                 jsondata.forEach(data => {
-                    db.storeData(req.params.domain, data.hash, data.path, data.statusCode ? data.statusCode : 200, data.headers, data.json, data.isProtected);
+                    db.storeData(req.params.domain, data.hash, data.path, data.statusCode ? data.statusCode : 200, data.headers, data.json, data.isProtected, res);
                 });
                 res.render('elementsimport', {selectedDomain: req.params.domain, status: "Updated data from file " + filename});
             } catch(err) {

@@ -121,7 +121,7 @@ exports.postData = function(req, res) {
                             if (externalResults) {
                                 // Save data in database and pass back to frontend
                                 let headers = (externalResults) ? JSON.stringify(externalResults.headers) : "";
-                                db.storeData(req.get('host'), null, path, externalResults.statusCode, headers, body);
+                                db.storeData(req.get('host'), null, path, externalResults.statusCode, headers, body, false, res);
                                 db.updateHeadersList(req.get('host'), false, (externalResults) ? externalResults.headers : {}, res, function(err, sendHeaders) {
                                     sendResultJson(res, externalResults.statusCode, headers, sendHeaders, body);
                                 });
