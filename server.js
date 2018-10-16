@@ -66,7 +66,6 @@ var mongoUri = 'mongodb://localhost/mirrorjson';
 mongoose.connect(mongoUri, {useMongoClient: true});
 
 mongoose.connection.on('error', function () {
-    console.log(err);
     throw new Error('Unable to connect to database at ' + mongoUri);
 });
 
